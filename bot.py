@@ -4,6 +4,7 @@ import re
 import praw
 import os
 
+
 def replySubmissions(submission):
     submission.reply("suipiss")
     print(f"replied to post {submission.permalink}")
@@ -16,8 +17,8 @@ def replyMention(mention):
         "i love suipiss mmmmmmmmmmmmmmmmmmm",
         "sussei",
         "hoshimachi sussei",
-        "peko",
-        "nanora",
+        "suipiss peko",
+        "suipiss nanora",
         ":suipiss:",
         "ringo juice yum",
         "calpiss",
@@ -30,8 +31,7 @@ def replyMention(mention):
         "It's very bubbly because of 7 Up, which I used to simulate the prescence of carbonated beverages in her diet",
         "My plan is to smell the cup periodically during her streams. Drink rarely in sips so the mixture doesn't harm me.",
     ]
-    replyTextOthers = len(replyTextMessages) - 1
-    replyTextWeights = [0.5] + [0.5 / replyTextOthers for _ in range(replyTextOthers)]
+    replyTextWeights = [0.5] + [0.5 / (len(replyTextMessages) - 1)] * (len(replyTextMessages) - 1)
     mention.reply(random.choices(replyTextMessages, weights=replyTextWeights, k=1))
     print(f"mentioned {mention.permalink}")
 
@@ -42,7 +42,8 @@ def replyGratitude(comment):
         "arigathanks",
         "pekoggers",
         "suipiss <3",
-        "sussei baka",
+        "fubuhappy",
+        ":D",
         "cum",
     ]
     comment.reply(random.choice(replyTextMessages))
@@ -85,11 +86,11 @@ def alreadyRepliedComment(comment):
 
 def main():
     reddit = praw.Reddit(
-        user_agent=os.environ['user_agent'],
-        client_id=os.environ['client_id'],
-        client_secret=os.environ['client_secret'],
-        username=os.environ['username'],
-        password=os.environ['password'],
+        user_agent = os.environ["user_agent"],
+        client_id = os.environ["client_id"],
+        client_secret = os.environ["client_secret"],
+        username = os.environ["username"],
+        password = os.environ["password"],
     )
     print(reddit.user.me())
 
@@ -100,11 +101,11 @@ def main():
         for comment in comment_stream:
             if comment is None:
                 break
-            if not comment.author:
-                continue
-            if comment.author == "suipiss":
-                continue
-            if alreadyRepliedComment(comment):
+            if (
+                not comment.author
+                or comment.author == "suipiss"
+                or alreadyRepliedComment(comment)
+            ):
                 continue
             if (
                 "suipiss" in re.sub("[^a-z0-9]", "", comment.body.lower())
