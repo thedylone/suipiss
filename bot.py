@@ -13,6 +13,7 @@ def replySubmissions(submission):
 def replyMention(mention):
     replyTextMessages = [
         "suipiss",
+        "[suipiss](https://youtube.com/clip/UgkxphA8-saXuOVatZ-TXls3l-JVYEzTRO6X)",
         "suisex",
         "i love suipiss mmmmmmmmmmmmmmmmmmm",
         "sussei",
@@ -31,7 +32,9 @@ def replyMention(mention):
         "It's very bubbly because of 7 Up, which I used to simulate the prescence of carbonated beverages in her diet",
         "My plan is to smell the cup periodically during her streams. Drink rarely in sips so the mixture doesn't harm me.",
     ]
-    replyTextWeights = [0.5] + [0.5 / (len(replyTextMessages) - 1)] * (len(replyTextMessages) - 1)
+    replyTextWeights = [0.5] + [0.5 / (len(replyTextMessages) - 1)] * (
+        len(replyTextMessages) - 1
+    )
     mention.reply(random.choices(replyTextMessages, weights=replyTextWeights, k=1))
     print(f"mentioned {mention.permalink}")
 
@@ -86,11 +89,11 @@ def alreadyRepliedComment(comment):
 
 def main():
     reddit = praw.Reddit(
-        user_agent = os.environ["user_agent"],
-        client_id = os.environ["client_id"],
-        client_secret = os.environ["client_secret"],
-        username = os.environ["username"],
-        password = os.environ["password"],
+        user_agent=os.environ["user_agent"],
+        client_id=os.environ["client_id"],
+        client_secret=os.environ["client_secret"],
+        username=os.environ["username"],
+        password=os.environ["password"],
     )
     print(reddit.user.me())
 
