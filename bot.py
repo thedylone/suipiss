@@ -52,6 +52,9 @@ def replyGratitude(comment):
     comment.reply(random.choice(replyTextMessages))
     print(f"thanked {comment.permalink}")
 
+def replyCustom(comment, reply_message):
+    comment.reply(reply_message)
+    print(f"replied custom comment with {reply_message} at {comment.permalink}")
 
 def alreadyRepliedSubmission(submission):
     for top_comment in submission.comments:
@@ -110,13 +113,6 @@ def main():
                 or alreadyRepliedComment(comment)
             ):
                 continue
-            if (
-                "suipiss" in re.sub("[^a-z0-9]", "", comment.body.lower())
-                and comment.parent().author
-                and comment.parent().author.name != "suipiss"
-            ):
-                replyMention(comment)
-                continue
             if comment.parent().author and comment.parent().author.name == "suipiss":
                 gratitude = ["thank", "good", "love"]
                 if any(
@@ -124,6 +120,22 @@ def main():
                     for thank in gratitude
                 ):
                     replyGratitude(comment)
+                    continue
+            if not comment.is_root and comment.parent().parent().author and comment.parent().parent().author.name == "suipiss":
+                if comment.author.name == "pekofy_bot":
+                    replyCustom(comment, "omg pekofy bot so cool")
+                    continue
+                if comment.author.name == "B0tRank":
+                    replyCustom(comment, "suipiss number one bot")
+                    continue
+            if (
+                "suipiss" in re.sub("[^a-z0-9]", "", comment.body.lower())
+                and comment.parent().author
+                and comment.parent().author.name != "suipiss"
+            ):
+                replyMention(comment)
+                continue
+
         for submission in submission_stream:
             if submission is None:
                 break
