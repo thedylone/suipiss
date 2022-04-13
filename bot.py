@@ -133,7 +133,10 @@ def main():
                 and comment.parent().author
                 and comment.parent().author.name != "suipiss"
             ):
-                replyMention(comment)
+                if comment.author.name == "pekofy_bot":
+                    replyCustom(comment, "suipiss peko suipiss peko suipiss peko suipiss peko")
+                else:
+                    replyMention(comment)
                 continue
 
         for submission in submission_stream:
