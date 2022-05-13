@@ -5,13 +5,13 @@ import praw
 import os
 
 
-def replySubmissions(submission):
+def reply_submission(submission):
     submission.reply("suipiss")
     print(f"replied to post {submission.permalink}")
 
 
-def replyMention(mention):
-    replyTextMessages = [
+def reply_mention(mention):
+    reply_text_messages = [
         "suipiss",
         "[suipiss](https://youtube.com/clip/UgkxphA8-saXuOVatZ-TXls3l-JVYEzTRO6X)",
         "suisex",
@@ -32,15 +32,15 @@ def replyMention(mention):
         "It's very bubbly because of 7 Up, which I used to simulate the prescence of carbonated beverages in her diet",
         "My plan is to smell the cup periodically during her streams. Drink rarely in sips so the mixture doesn't harm me.",
     ]
-    replyTextWeights = [0.5] + [0.5 / (len(replyTextMessages) - 1)] * (
-        len(replyTextMessages) - 1
+    reply_text_weights = [0.5] + [0.5 / (len(reply_text_messages) - 1)] * (
+        len(reply_text_messages) - 1
     )
-    mention.reply(random.choices(replyTextMessages, weights=replyTextWeights, k=1))
+    mention.reply(random.choices(reply_text_messages, weights=reply_text_weights, k=1))
     print(f"mentioned {mention.permalink}")
 
 
-def replyGratitude(comment):
-    replyTextMessages = [
+def reply_gratitude(comment):
+    reply_text_messages = [
         "suipiss",
         "arigathanks",
         "pekoggers",
@@ -49,14 +49,16 @@ def replyGratitude(comment):
         ":D",
         "cum",
     ]
-    comment.reply(random.choice(replyTextMessages))
+    comment.reply(random.choice(reply_text_messages))
     print(f"thanked {comment.permalink}")
 
-def replyCustom(comment, reply_message):
+
+def reply_custom(comment, reply_message):
     comment.reply(reply_message)
     print(f"replied custom comment with {reply_message} at {comment.permalink}")
 
-def alreadyRepliedSubmission(submission):
+
+def already_replied_submission(submission):
     for top_comment in submission.comments:
         if top_comment.parent().id != submission.id:
             break
@@ -66,7 +68,7 @@ def alreadyRepliedSubmission(submission):
     return False
 
 
-def alreadyRepliedComment(comment):
+def already_replied_comment(comment):
     second_refresh = False
     for _ in range(2):
         try:
@@ -92,11 +94,11 @@ def alreadyRepliedComment(comment):
 
 def main():
     reddit = praw.Reddit(
-        user_agent=os.environ["user_agent"],
-        client_id=os.environ["client_id"],
-        client_secret=os.environ["client_secret"],
-        username=os.environ["username"],
-        password=os.environ["password"],
+        user_agent=os.environ["USER_AGENT"],
+        client_id=os.environ["CLIENT_ID"],
+        client_secret=os.environ["CLIENT_SECRET"],
+        username=os.environ["USERNAME"],
+        password=os.environ["PASSWORD"],
     )
     print(reddit.user.me())
 
@@ -110,7 +112,7 @@ def main():
             if (
                 not comment.author
                 or comment.author == "suipiss"
-                or alreadyRepliedComment(comment)
+                or already_replied_comment(comment)
             ):
                 continue
             if comment.parent().author and comment.parent().author.name == "suipiss":
@@ -119,14 +121,18 @@ def main():
                     thank in re.sub("[^a-z0-9]", "", comment.body.lower())
                     for thank in gratitude
                 ):
-                    replyGratitude(comment)
+                    reply_gratitude(comment)
                     continue
-            if not comment.is_root and comment.parent().parent().author and comment.parent().parent().author.name == "suipiss":
+            if (
+                not comment.is_root
+                and comment.parent().parent().author
+                and comment.parent().parent().author.name == "suipiss"
+            ):
                 if comment.author.name == "pekofy_bot":
-                    replyCustom(comment, "omg pekofy bot so cool")
+                    reply_custom(comment, "omg pekofy bot so cool")
                     continue
                 if comment.author.name == "B0tRank":
-                    replyCustom(comment, "suipiss number one bot")
+                    reply_custom(comment, "suipiss number one bot")
                     continue
             if (
                 "suipiss" in re.sub("[^a-z0-9]", "", comment.body.lower())
@@ -134,20 +140,22 @@ def main():
                 and comment.parent().author.name != "suipiss"
             ):
                 if comment.author.name == "pekofy_bot":
-                    replyCustom(comment, "suipiss peko suipiss peko suipiss peko suipiss peko")
+                    reply_custom(
+                        comment, "suipiss peko suipiss peko suipiss peko suipiss peko"
+                    )
                 else:
-                    replyMention(comment)
+                    reply_mention(comment)
                 continue
 
         for submission in submission_stream:
             if submission is None:
                 break
-            if alreadyRepliedSubmission(submission):
+            if already_replied_submission(submission):
                 continue
             if "suipiss" in re.sub(
                 "[^a-z0-9]", "", submission.title.lower()
             ) or "suipiss" in re.sub("[^a-z0-9]", "", submission.selftext.lower()):
-                replySubmissions(submission)
+                reply_submission(submission)
                 continue
 
 
