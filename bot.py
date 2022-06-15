@@ -4,13 +4,21 @@ import re
 import praw
 import os
 
+USERNAME = os.environ.get("USERNAME")
+
 
 def reply_submission(submission):
+    """submits a comment to a submission."""
     submission.reply("suipiss")
     print(f"replied to post {submission.permalink}")
 
 
 def reply_mention(mention):
+    """
+    submits a comment as a reply to a mentioned comment.
+    has a 50% chance to reply with the first message in reply_text_messages,
+    with 50% chance split among the other messages in reply_text_messages.
+    """
     reply_text_messages = [
         "suipiss",
         "[suipiss](https://youtube.com/clip/UgkxphA8-saXuOVatZ-TXls3l-JVYEzTRO6X)",
@@ -40,6 +48,10 @@ def reply_mention(mention):
 
 
 def reply_gratitude(comment):
+    """
+    submits a comment as a reply to a comment thanking the bot.
+    randomly chooses a message from reply_text_messages.
+    """
     reply_text_messages = [
         "suipiss",
         "arigathanks",
@@ -54,11 +66,13 @@ def reply_gratitude(comment):
 
 
 def reply_custom(comment, reply_message):
+    """submits a comment as a reply to a comment with a custom reply message."""
     comment.reply(reply_message)
     print(f"replied custom comment with {reply_message} at {comment.permalink}")
 
 
 def already_replied_submission(submission):
+    """checks if a submission has already been replied to."""
     for top_comment in submission.comments:
         if top_comment.parent().id != submission.id:
             break
@@ -69,6 +83,7 @@ def already_replied_submission(submission):
 
 
 def already_replied_comment(comment):
+    """checks if a comment has already been replied to."""
     second_refresh = False
     for _ in range(2):
         try:
@@ -94,15 +109,15 @@ def already_replied_comment(comment):
 
 def main():
     reddit = praw.Reddit(
-        user_agent=os.environ["USER_AGENT"],
-        client_id=os.environ["CLIENT_ID"],
-        client_secret=os.environ["CLIENT_SECRET"],
-        username=os.environ["USERNAME"],
-        password=os.environ["PASSWORD"],
+        user_agent=os.environ.get("USER_AGENT"),
+        client_id=os.environ.get("CLIENT_ID"),
+        client_secret=os.environ.get("CLIENT_SECRET"),
+        username=USERNAME,
+        password=os.environ.get("PASSWORD"),
     )
     print(reddit.user.me())
 
-    subreddits = reddit.subreddit("okbuddyhololive+okbuddysuisex")
+    subreddits = reddit.subreddit(os.environ.get("SUBREDDITS", "okbuddyhololive"))
     comment_stream = subreddits.stream.comments(pause_after=-1)
     submission_stream = subreddits.stream.submissions(pause_after=-1)
     while True:
@@ -111,11 +126,11 @@ def main():
                 break
             if (
                 not comment.author
-                or comment.author == "suipiss"
+                or comment.author == USERNAME
                 or already_replied_comment(comment)
             ):
                 continue
-            if comment.parent().author and comment.parent().author.name == "suipiss":
+            if comment.parent().author and comment.parent().author.name == USERNAME:
                 gratitude = ["thank", "good", "love"]
                 if any(
                     thank in re.sub("[^a-z0-9]", "", comment.body.lower())
@@ -126,7 +141,7 @@ def main():
             if (
                 not comment.is_root
                 and comment.parent().parent().author
-                and comment.parent().parent().author.name == "suipiss"
+                and comment.parent().parent().author.name == USERNAME
             ):
                 if comment.author.name == "pekofy_bot":
                     reply_custom(comment, "omg pekofy bot so cool")
@@ -137,7 +152,7 @@ def main():
             if (
                 "suipiss" in re.sub("[^a-z0-9]", "", comment.body.lower())
                 and comment.parent().author
-                and comment.parent().author.name != "suipiss"
+                and comment.parent().author.name != USERNAME
             ):
                 if comment.author.name == "pekofy_bot":
                     reply_custom(
