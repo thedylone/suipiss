@@ -24,13 +24,9 @@ def reply_mention(mention):
         "[suipiss](https://youtube.com/clip/UgkxphA8-saXuOVatZ-TXls3l-JVYEzTRO6X)",
         "suisex",
         "i love suipiss mmmmmmmmmmmmmmmmmmm",
-        "sussei",
-        "hoshimachi sussei",
-        "suipiss peko",
-        "suipiss nanora",
-        ":suipiss:",
         "ringo juice yum",
-        "calpiss",
+        "u heard of SUIPISS? a holy liquid occationally leaks from somewhere between two legs of suisei's",
+        "This fucking joke of a subreddit is the sole reason I can no longer watch Suisei's streams anymore. She WAS my favourite streamer of all time, nevermind in the context of hololive. Her streams are a masterpiece especially compared to today's vtuber trash on youtube. On my darkest days, I would put her stream on and be moved to tears everytime. But the fucking basement dwellers of r/okbuddyhololive have ruined any sense of enjoyment I had watching her streams. Mainly because of the stupid fucking meme of \"HoLY SHIt GuYS mY sUiPiSs iS CoMInG I bOuGht fIVe LiTTeRs?!!??\" And whenever I watch her streams and her her voice, I break down in hysterics because all I can think of is that dumbass fucking meme and the subhuman trash populating that subreddit. It ruins and emotional weigh and meaning to her videos because it's clouded by their absolute stupidity. I had to bring this up to my therapist because she was so special to me and this whole experience psychologically damaged me. I guess art is dead because people can't take art seriously anymore. They have to make it about some dead fucking meme or something and entirely devalue the art. This is the death of art happening before our very eyes, folks. And if you won't stand for the most influential artist of the century and not let their name be smeared by jokers of the internet, than you are not a true hololive fan. I want r/okbuddyhololive to be taken down because this is a disgrace to human expression and an assult on the psyche. Fuck you and fuck your dumbass fucking memes. Suisei deserves way better.",
         "I've been mixing my own urine, various perfumes and chemicals to make the perfect emulation of Hoshimachi Suisei's urine scent.",
         "I have also been eating a rather Asian diet to emulate what Suisei would eat and drink.",
         "I'm about three weeks into the project and have been strategically disposing portions of old urine, replacing it with new urine, adding slight touches of extra ammonia, expired apple juice (I suspect her urine would have a rather tangy flavour) and trace amounts of nitric acid.",
@@ -59,7 +55,7 @@ def reply_gratitude(comment):
         "suipiss <3",
         "fubuhappy",
         ":D",
-        "cum",
+        "suicum",
     ]
     comment.reply(random.choice(reply_text_messages))
     print(f"thanked {comment.permalink}")
@@ -143,11 +139,8 @@ def main():
                 and comment.parent().parent().author
                 and comment.parent().parent().author.name == USERNAME
             ):
-                if comment.author.name == "pekofy_bot":
-                    reply_custom(comment, "omg pekofy bot so cool")
-                    continue
                 if comment.author.name == "B0tRank":
-                    reply_custom(comment, "suipiss number one bot")
+                    reply_custom(comment, "bot??? not bot")
                     continue
             if (
                 "suipiss" in re.sub("[^a-z0-9]", "", comment.body.lower())
