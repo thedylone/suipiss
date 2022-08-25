@@ -20,3 +20,5 @@ in the newly created `.env` file:
 3. specify which subreddits to monitor
 
 running the `bot.py` script should start the bot. to confirm that the bot is logged in, the script will print out your bot's username.
+
+the bot can notify you (i.e. via discord) when it replies automatically via webhooks. place your discord webhook url into the `.env` file for it to send to.
