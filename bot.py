@@ -11,7 +11,7 @@ USERNAME = os.environ.get("USERNAME")
 
 def reply_submission(submission):
     """submits a comment to a submission."""
-    submission.reply("suipiss")
+    submission.reply(body="suipiss")
     print(f"replied to post https://www.reddit.com{submission.permalink}")
     webhook.post_webhook({"content": f"replied to post https://www.reddit.com{submission.permalink}"})
 
@@ -42,7 +42,7 @@ def reply_mention(mention):
     reply_text_weights = [0.5] + [0.5 / (len(reply_text_messages) - 1)] * (
         len(reply_text_messages) - 1
     )
-    mention.reply(random.choices(reply_text_messages, weights=reply_text_weights, k=1))
+    mention.reply(body=random.choices(reply_text_messages, weights=reply_text_weights, k=1))
     print(f"mentioned https://www.reddit.com{mention.permalink}")
     webhook.post_webhook({"content": f"mentioned https://www.reddit.com{mention.permalink}"})
 
@@ -61,14 +61,14 @@ def reply_gratitude(comment):
         ":D",
         "suicum",
     ]
-    comment.reply(random.choice(reply_text_messages))
+    comment.reply(body=random.choice(reply_text_messages))
     print(f"thanked https://www.reddit.com{comment.permalink}")
     webhook.post_webhook({"content": f"thanked https://www.reddit.com{comment.permalink}"})
 
 
 def reply_custom(comment, reply_message):
     """submits a comment as a reply to a comment with a custom reply message."""
-    comment.reply(reply_message)
+    comment.reply(body=reply_message)
     print(f"replied custom comment with {reply_message} at https://www.reddit.com{comment.permalink}")
     webhook.post_webhook({"content": f"replied custom comment with {reply_message} at https://www.reddit.com{comment.permalink}"})
 
