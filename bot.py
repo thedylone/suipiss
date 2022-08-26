@@ -205,5 +205,4 @@ def main():
 if __name__ == "__main__":
     signal.signal(signal.SIGTERM, exit_signal_handler)
     signal.signal(signal.SIGINT, exit_signal_handler)
-    signal.signal(signal.SIGBREAK, exit_signal_handler)
     main()
