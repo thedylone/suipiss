@@ -3,10 +3,18 @@ import random
 import re
 import praw
 import os
+import signal
+import sys
 
 import webhook
 
 USERNAME = os.environ.get("USERNAME")
+
+
+def exit_signal_handler(signal, frame):
+    print("shutting gracefully...")
+    webhook.post_webhook({"content": "shutting gracefully..."})
+    sys.exit(0)
 
 
 def reply_submission(submission):
@@ -195,4 +203,7 @@ def main():
 
 
 if __name__ == "__main__":
+    signal.signal(signal.SIGTERM, exit_signal_handler)
+    signal.signal(signal.SIGINT, exit_signal_handler)
+    signal.signal(signal.SIGBREAK, exit_signal_handler)
     main()
