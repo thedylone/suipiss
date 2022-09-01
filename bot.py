@@ -17,20 +17,49 @@ def exit_signal_handler(signal, frame):
     sys.exit(0)
 
 
-def reply_submission(submission):
-    """submits a comment to a submission."""
+def try_import_messages(path, default_message="suipiss"):
+    """
+    attempts to read file at given path and return list
+    of items split by line. if file is empty or unable to
+    be read, returns a list containing the default message.
+    """
+    reply_text_messages = []
     try:
-        with open("messages/mention.txt", "r", encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8") as f:
             reply_text_messages = f.read().splitlines()
-        if not reply_text_messages:
-            print("messages/mention.txt empty, using default")
-            reply_text_messages = ["suipiss"]
     except:
-        print("unable to open messages/mention.txt, using default")
-        reply_text_messages = ["suipiss"]
-    reply_text_weights = [0.5] + [0.5 / (len(reply_text_messages) - 1)] * (
-        len(reply_text_messages) - 1
-    )
+        print(f"unable to open {path}")
+    if not reply_text_messages:
+        print("no messages found, using default message")
+        reply_text_messages = [default_message]
+    return reply_text_messages
+
+
+def assign_random_weights(list):
+    """
+    returns a list of weights from the input.
+    if there are multiple items, the first item has 0.5 chance,
+    and the remaining 0.5 is split among the remaining items.
+    """
+    length = len(list)
+    if length == 0:
+        weights = []
+    elif length > 1:
+        weights = [0.5] + [0.5 / (length - 1)] * (length - 1)
+    elif length == 1:
+        weights = [1]
+    return weights
+
+
+def reply_submission(submission):
+    """
+    submits a comment to a submission.
+    attempts to retrieve messages from messages/mention.txt.
+    if there are multiple messages, the first messages has a
+    50% chance of being selected.
+    """
+    reply_text_messages = try_import_messages("messages/mention.txt")
+    reply_text_weights = assign_random_weights(reply_text_messages)
     submission.reply(
         body=random.choices(reply_text_messages, weights=reply_text_weights, k=1)
     )
@@ -43,21 +72,12 @@ def reply_submission(submission):
 def reply_mention(mention):
     """
     submits a comment as a reply to a mentioned comment.
-    has a 50% chance to reply with the first message in reply_text_messages,
-    with 50% chance split among the other messages in reply_text_messages.
+    attempts to retrieve messages from messages/mention.txt.
+    if there are multiple messages, the first messages has a
+    50% chance of being selected.
     """
-    try:
-        with open("messages/mention.txt", "r", encoding="utf-8") as f:
-            reply_text_messages = f.read().splitlines()
-        if not reply_text_messages:
-            print("messages/mention.txt empty, using default")
-            reply_text_messages = ["suipiss"]
-    except:
-        print("unable to open messages/mention.txt, using default")
-        reply_text_messages = ["suipiss"]
-    reply_text_weights = [0.5] + [0.5 / (len(reply_text_messages) - 1)] * (
-        len(reply_text_messages) - 1
-    )
+    reply_text_messages = try_import_messages("messages/mention.txt")
+    reply_text_weights = assign_random_weights(reply_text_messages)
     mention.reply(
         body=random.choices(reply_text_messages, weights=reply_text_weights, k=1)
     )
@@ -70,17 +90,10 @@ def reply_mention(mention):
 def reply_gratitude(comment):
     """
     submits a comment as a reply to a comment thanking the bot.
-    randomly chooses a message from reply_text_messages.
+    attempts to retrieve messages from messages/thank.txt.
+    all messages have equal chance of being selected.
     """
-    try:
-        with open("messages/thank.txt", "r", encoding="utf-8") as f:
-            reply_text_messages = f.read().splitlines()
-        if not reply_text_messages:
-            print("messages/thank.txt empty, using default")
-            reply_text_messages = ["suipiss"]
-    except:
-        print("unable to open messages/thank.txt, using default")
-        reply_text_messages = ["suipiss"]
+    reply_text_messages = try_import_messages("messages/thank.txt")
     comment.reply(body=random.choice(reply_text_messages))
     print(f"thanked https://www.reddit.com{comment.permalink}")
     webhook.post_webhook(
