@@ -68,12 +68,11 @@ def reply_submission(submission):
     """
     reply_text_messages = try_import_messages("messages/mention.txt")
     reply_text_weights = assign_random_weights(reply_text_messages)
-    submission.reply(
-        body=random.choices(reply_text_messages, weights=reply_text_weights, k=1)
-    )
-    print(f"replied to post https://www.reddit.com{submission.permalink}")
+    msg = random.choices(reply_text_messages, weights=reply_text_weights, k=1)
+    submission.reply(body=msg)
+    print(f"[POST] https://www.reddit.com{submission.permalink} with {msg}")
     webhook.post_webhook(
-        {"content": f"replied to post https://www.reddit.com{submission.permalink}"}
+        {"content": f"[POST] https://www.reddit.com{submission.permalink} with {msg}"}
     )
 
 
@@ -86,12 +85,11 @@ def reply_mention(mention):
     """
     reply_text_messages = try_import_messages("messages/mention.txt")
     reply_text_weights = assign_random_weights(reply_text_messages)
-    mention.reply(
-        body=random.choices(reply_text_messages, weights=reply_text_weights, k=1)
-    )
-    print(f"mentioned https://www.reddit.com{mention.permalink}")
+    msg = random.choices(reply_text_messages, weights=reply_text_weights, k=1)
+    mention.reply(body=msg)
+    print(f"[MENTION] https://www.reddit.com{mention.permalink} with {msg}")
     webhook.post_webhook(
-        {"content": f"mentioned https://www.reddit.com{mention.permalink}"}
+        {"content": f"[MENTION] https://www.reddit.com{mention.permalink} with {msg}"}
     )
 
 
@@ -102,23 +100,20 @@ def reply_gratitude(comment):
     all messages have equal chance of being selected.
     """
     reply_text_messages = try_import_messages("messages/thank.txt")
-    comment.reply(body=random.choice(reply_text_messages))
-    print(f"thanked https://www.reddit.com{comment.permalink}")
+    msg = random.choice(reply_text_messages)
+    comment.reply(body=msg)
+    print(f"[THANK] https://www.reddit.com{comment.permalink} with {msg}")
     webhook.post_webhook(
-        {"content": f"thanked https://www.reddit.com{comment.permalink}"}
+        {"content": f"[THANK] https://www.reddit.com{comment.permalink} with {msg}"}
     )
 
 
-def reply_custom(comment, reply_message):
+def reply_custom(comment, msg):
     """submits a comment as a reply to a comment with a custom reply message."""
-    comment.reply(body=reply_message)
-    print(
-        f"replied custom comment with {reply_message} at https://www.reddit.com{comment.permalink}"
-    )
+    comment.reply(body=msg)
+    print(f"[CUSTOM] https://www.reddit.com{comment.permalink} with {msg}")
     webhook.post_webhook(
-        {
-            "content": f"replied custom comment with {reply_message} at https://www.reddit.com{comment.permalink}"
-        }
+        {"content": f"[CUSTOM] https://www.reddit.com{comment.permalink} with {msg}"}
     )
 
 
