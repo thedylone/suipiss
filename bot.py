@@ -153,6 +153,28 @@ def already_replied_comment(comment):
     return False
 
 
+def comment_is_self(comment, parent_level=0):
+    """checks if a comment's author is the user"""
+    while parent_level > 0:
+        if hasattr(comment, "parent"):
+            comment = comment.parent()
+            parent_level -= 1
+        else:
+            return False
+    return comment.author and comment.author == USERNAME
+
+
+def keyword_in_comment(comment, *keywords):
+    body = re.sub("[^a-z0-9]", "", comment.body.lower())
+    return any(key in body for key in keywords)
+
+
+def keyword_in_submission(submission, *keywords):
+    title = re.sub("[^a-z0-9]", "", submission.title.lower())
+    text = re.sub("[^a-z0-9]", "", submission.selftext.lower())
+    return any(key in title or key in text for key in keywords)
+
+
 def main():
     print(reddit.user.me())
     webhook.post_webhook({"content": f"logged in as {reddit.user.me()}"})
@@ -164,38 +186,24 @@ def main():
         for comment in comment_stream:
             if comment is None:
                 break
-            if (
-                not comment.author
-                or comment.author == USERNAME
-                or already_replied_comment(comment)
-            ):
+            if comment_is_self(comment) or already_replied_comment(comment):
                 continue
-            if comment.parent().author and comment.parent().author.name == USERNAME:
+            if comment_is_self(comment, 1):
                 gratitude = ["thank", "good", "love"]
-                if any(
-                    thank in re.sub("[^a-z0-9]", "", comment.body.lower())
-                    for thank in gratitude
-                ):
+                if keyword_in_comment(comment, *gratitude):
                     reply_gratitude(comment)
                     continue
-            if (
-                not comment.is_root
-                and comment.parent().parent().author
-                and comment.parent().parent().author.name == USERNAME
-            ):
+            if comment_is_self(comment, 2):
                 if comment.author.name == "B0tRank":
                     reply_custom(comment, "bot??? not bot")
                     continue
-            if (
-                "suipiss" in re.sub("[^a-z0-9]", "", comment.body.lower())
-                and comment.parent().author
-                and comment.parent().author.name != USERNAME
-            ):
+            if keyword_in_comment(comment, "suipiss"):
                 if comment.author.name == "pekofy_bot":
                     reply_custom(
                         comment, "suipiss peko suipiss peko suipiss peko suipiss peko"
                     )
-                else:
+                elif not comment_is_self(comment, 1):
+                    # dont reply to own comment to prevent spam
                     reply_mention(comment)
                 continue
 
@@ -204,9 +212,7 @@ def main():
                 break
             if already_replied_submission(submission):
                 continue
-            if "suipiss" in re.sub(
-                "[^a-z0-9]", "", submission.title.lower()
-            ) or "suipiss" in re.sub("[^a-z0-9]", "", submission.selftext.lower()):
+            if keyword_in_submission(submission, "suipiss"):
                 reply_submission(submission)
                 continue
 
