@@ -10,6 +10,14 @@ import webhook
 
 USERNAME = os.environ.get("USERNAME")
 
+reddit = praw.Reddit(
+    user_agent=os.environ.get("USER_AGENT"),
+    client_id=os.environ.get("CLIENT_ID"),
+    client_secret=os.environ.get("CLIENT_SECRET"),
+    username=USERNAME,
+    password=os.environ.get("PASSWORD"),
+)
+
 
 def exit_signal_handler(signal, frame):
     print("shutting gracefully...")
@@ -119,7 +127,7 @@ def already_replied_submission(submission):
     for top_comment in submission.comments:
         if top_comment.parent().id != submission.id:
             break
-        if top_comment.author == "suipiss":
+        if top_comment.author == USERNAME:
             print(f"same https://www.reddit.com{submission.permalink}")
             return True
     return False
@@ -144,20 +152,13 @@ def already_replied_comment(comment):
     for top_comment in child_comments:
         if top_comment.parent().id != comment.id:
             break
-        if top_comment.author == "suipiss":
+        if top_comment.author == USERNAME:
             print(f"same https://www.reddit.com{comment.permalink}")
             return True
     return False
 
 
 def main():
-    reddit = praw.Reddit(
-        user_agent=os.environ.get("USER_AGENT"),
-        client_id=os.environ.get("CLIENT_ID"),
-        client_secret=os.environ.get("CLIENT_SECRET"),
-        username=USERNAME,
-        password=os.environ.get("PASSWORD"),
-    )
     print(reddit.user.me())
     webhook.post_webhook({"content": f"logged in as {reddit.user.me()}"})
 
