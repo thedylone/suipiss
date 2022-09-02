@@ -1,2 +1,3 @@
 praw
 python-dotenv
+pyyaml
