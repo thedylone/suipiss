@@ -24,6 +24,7 @@ class TestSignal(unittest.TestCase):
             proc = subprocess.Popen(
                 ["nohup", "python", "bot.py"],
                 shell=True,
+                preexec_fn=os.setpgrp,
             )
             time.sleep(2)
             print("sending signal")
