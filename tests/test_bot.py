@@ -1,6 +1,8 @@
 import unittest
 from bot import (
     praw,
+    yaml,
+    try_load_config,
     try_import_messages,
     assign_random_weights,
     already_replied_submission,
@@ -13,6 +15,18 @@ import bot
 
 
 class TestBot(unittest.TestCase):
+    def test_try_load_config(self):
+        # test valid config.yaml
+        self.assertEqual(
+            try_load_config("tests/fixtures/valid.yaml"), {"key": "value"}
+        )
+        # test invalid path
+        with self.assertRaises(FileNotFoundError):
+            try_load_config("")
+        # test invalid yaml
+        with self.assertRaises(yaml.scanner.ScannerError):
+            try_load_config("tests/fixtures/invalid.yaml")
+
     def test_try_import_messages(self):
         # test multiple lines
         self.assertEqual(

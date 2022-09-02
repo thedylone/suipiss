@@ -15,27 +15,29 @@ dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
 
-def try_load_config():
+def try_load_config(path):
     try:
-        with open("config.yaml", "r") as f:
+        with open(path, "r") as f:
             config = yaml.safe_load(f)
-    except FileNotFoundError:
-        print("config.yaml not found! creating config.yaml...")
-        with open("config.yaml", "w") as f:
-            yaml.dump({"USERNAME": "", "SUBREDDITS": "", "KEYWORD": ""}, f)
-        print("please fill in the config.yaml with your configurations")
-        sys.exit(1)
-    except yaml.scanner.ScannerError or yaml.parser.ParserError:
-        print("invalid config.yaml file! please ensure it is valid")
-        sys.exit(1)
-    except Exception:
+    except FileNotFoundError as e:
+        print(f"{path} not found!")
+        if path == "config.yaml":
+            print("creating config.yaml...")
+            with open("config.yaml", "w") as f:
+                yaml.dump({"SUBREDDITS": "", "KEYWORD": ""}, f)
+            print("please fill in the config.yaml with your configurations")
+        raise e
+    except yaml.scanner.ScannerError or yaml.parser.ParserError as e:
+        print("invalid file! please ensure it is valid")
+        raise e
+    except Exception as e:
         print("an error occured")
-        sys.exit(1)
+        raise e
     return config
 
 
-config = try_load_config()
-USERNAME = config.get("USERNAME")
+config = try_load_config("config.yaml")
+USERNAME = os.environ.get("BOT_USERNAME")
 SUBREDDITS = config.get("SUBREDDITS", "okbuddyhololive")
 KEYWORD = config.get("KEYWORD", USERNAME)
 
