@@ -3,6 +3,14 @@
 
 name: Python application
 
+env:
+  CLIENT_ID: ${{ secrets.CLIENT_ID }}
+  CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+  PASSWORD: ${{ secrets.PASSWORD }}
+  USER_AGENT: ${{ secrets.USER_AGENT }}
+  BOT_USERNAME: ${{ secrets.BOT_USERNAME }}
+  WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+  
 on:
   push:
     branches: [ "main" ]
