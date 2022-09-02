@@ -1,6 +1,7 @@
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
+import yaml
 import time
 import random
 import re
@@ -13,8 +14,30 @@ import webhook
 dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
 
-USERNAME = os.environ.get("BOT_USERNAME")
-SUBREDDITS = os.environ.get("SUBREDDITS", "okbuddyhololive")
+
+def try_load_config():
+    try:
+        with open("config.yaml", "r") as f:
+            config = yaml.safe_load(f)
+    except FileNotFoundError:
+        print("config.yaml not found! creating config.yaml...")
+        with open("config.yaml", "w") as f:
+            yaml.dump({"USERNAME": "", "SUBREDDITS": "", "KEYWORD": ""}, f)
+        print("please fill in the config.yaml with your configurations")
+        sys.exit(1)
+    except yaml.scanner.ScannerError or yaml.parser.ParserError:
+        print("invalid config.yaml file! please ensure it is valid")
+        sys.exit(1)
+    except Exception:
+        print("an error occured")
+        sys.exit(1)
+    return config
+
+
+config = try_load_config()
+USERNAME = config.get("USERNAME")
+SUBREDDITS = config.get("SUBREDDITS", "okbuddyhololive")
+KEYWORD = config.get("KEYWORD", USERNAME)
 
 reddit = praw.Reddit(
     user_agent=os.environ.get("USER_AGENT"),
@@ -204,7 +227,7 @@ def main():
                 if comment.author.name == "B0tRank":
                     reply_custom(comment, "bot??? not bot")
                     continue
-            if keyword_in_comment(comment, "suipiss"):
+            if keyword_in_comment(comment, KEYWORD):
                 if comment.author.name == "pekofy_bot":
                     reply_custom(comment, "suipiss peko suipiss peko")
                 elif not comment_is_self(comment, 1):
@@ -217,7 +240,7 @@ def main():
                 break
             if already_replied_submission(submission):
                 continue
-            if keyword_in_submission(submission, "suipiss"):
+            if keyword_in_submission(submission, KEYWORD):
                 reply_submission(submission)
                 continue
 

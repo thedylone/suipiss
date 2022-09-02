@@ -17,7 +17,10 @@ after creating your app on the [reddit prefs apps page](https://www.reddit.com/p
 in the newly created `.env` file:
 
 2. replace the variables with your own bot's authentication details
-3. specify which subreddits to monitor
+
+there are more configurations to edit as well, in the [config.yaml file](/config.yaml)
+
+3. replace the variables with your desired configurations. note that username refers to the reddit account's username.
 
 running the `bot.py` script should start the bot. to confirm that the bot is logged in, the script will print out your bot's username.
 
