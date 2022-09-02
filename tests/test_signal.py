@@ -11,25 +11,27 @@ class TestSignal(unittest.TestCase):
             # windows
             proc = subprocess.Popen(
                 ["python", "bot.py"],
-                shell=True,
+                shell=False,
                 creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
             )
             time.sleep(2)
             print("sending signal")
             proc.send_signal(signal.CTRL_BREAK_EVENT)
             time.sleep(2)
+            proc.wait()
             self.assertIsNotNone(proc.poll)
         elif os.name == "posix":
             # linux
             proc = subprocess.Popen(
-                ["nohup", "python", "bot.py"],
-                shell=True,
+                ["python", "bot.py"],
+                shell=False,
                 preexec_fn=os.setpgrp,
             )
             time.sleep(2)
             print("sending signal")
             proc.send_signal(signal.SIGTERM)
             time.sleep(2)
+            proc.wait()
             self.assertIsNotNone(proc.poll)
 
 

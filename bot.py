@@ -1,14 +1,20 @@
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
 import time
 import random
 import re
 import praw
-import os
 import signal
 import sys
 
 import webhook
 
-USERNAME = os.environ.get("USERNAME")
+dotenv_path = join(dirname(__file__), ".env")
+load_dotenv(dotenv_path)
+
+USERNAME = os.environ.get("BOT_USERNAME")
+SUBREDDITS = os.environ.get("SUBREDDITS", "okbuddyhololive")
 
 reddit = praw.Reddit(
     user_agent=os.environ.get("USER_AGENT"),
@@ -35,8 +41,10 @@ def try_import_messages(path, default_message="suipiss"):
     try:
         with open(path, "r", encoding="utf-8") as f:
             reply_text_messages = f.read().splitlines()
-    except:
+    except OSError:
         print(f"unable to open {path}")
+    except Exception as e:
+        print(f"unexpected error opening {path}: {e}")
     if not reply_text_messages:
         print("no messages found, using default message")
         reply_text_messages = [default_message]
@@ -70,10 +78,9 @@ def reply_submission(submission):
     reply_text_weights = assign_random_weights(reply_text_messages)
     msg = random.choices(reply_text_messages, weights=reply_text_weights, k=1)
     submission.reply(body=msg)
-    print(f"[POST] https://www.reddit.com{submission.permalink} with {msg}")
-    webhook.post_webhook(
-        {"content": f"[POST] https://www.reddit.com{submission.permalink} with {msg}"}
-    )
+    notif = f"[POST] https://www.reddit.com{submission.permalink} with {msg}"
+    print(notif)
+    webhook.post_webhook({"content": notif})
 
 
 def reply_mention(mention):
@@ -87,10 +94,9 @@ def reply_mention(mention):
     reply_text_weights = assign_random_weights(reply_text_messages)
     msg = random.choices(reply_text_messages, weights=reply_text_weights, k=1)
     mention.reply(body=msg)
-    print(f"[MENTION] https://www.reddit.com{mention.permalink} with {msg}")
-    webhook.post_webhook(
-        {"content": f"[MENTION] https://www.reddit.com{mention.permalink} with {msg}"}
-    )
+    notif = f"[MENTION] https://www.reddit.com{mention.permalink} with {msg}"
+    print(notif)
+    webhook.post_webhook({"content": notif})
 
 
 def reply_gratitude(comment):
@@ -102,19 +108,20 @@ def reply_gratitude(comment):
     reply_text_messages = try_import_messages("messages/thank.txt")
     msg = random.choice(reply_text_messages)
     comment.reply(body=msg)
-    print(f"[THANK] https://www.reddit.com{comment.permalink} with {msg}")
-    webhook.post_webhook(
-        {"content": f"[THANK] https://www.reddit.com{comment.permalink} with {msg}"}
-    )
+    notif = f"[THANK] https://www.reddit.com{comment.permalink} with {msg}"
+    print(notif)
+    webhook.post_webhook({"content": notif})
 
 
 def reply_custom(comment, msg):
-    """submits a comment as a reply to a comment with a custom reply message."""
+    """
+    submits a comment as a reply to a comment
+    with a custom reply message.
+    """
     comment.reply(body=msg)
-    print(f"[CUSTOM] https://www.reddit.com{comment.permalink} with {msg}")
-    webhook.post_webhook(
-        {"content": f"[CUSTOM] https://www.reddit.com{comment.permalink} with {msg}"}
-    )
+    notif = f"[CUSTOM] https://www.reddit.com{comment.permalink} with {msg}"
+    print(notif)
+    webhook.post_webhook({"content": notif})
 
 
 def already_replied_submission(submission):
@@ -179,7 +186,7 @@ def main():
     print(reddit.user.me())
     webhook.post_webhook({"content": f"logged in as {reddit.user.me()}"})
 
-    subreddits = reddit.subreddit(os.environ.get("SUBREDDITS", "okbuddyhololive"))
+    subreddits = reddit.subreddit(SUBREDDITS)
     comment_stream = subreddits.stream.comments(pause_after=-1)
     submission_stream = subreddits.stream.submissions(pause_after=-1)
     while True:
@@ -199,9 +206,7 @@ def main():
                     continue
             if keyword_in_comment(comment, "suipiss"):
                 if comment.author.name == "pekofy_bot":
-                    reply_custom(
-                        comment, "suipiss peko suipiss peko suipiss peko suipiss peko"
-                    )
+                    reply_custom(comment, "suipiss peko suipiss peko")
                 elif not comment_is_self(comment, 1):
                     # dont reply to own comment to prevent spam
                     reply_mention(comment)
