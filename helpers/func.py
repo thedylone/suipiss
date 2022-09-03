@@ -1,8 +1,14 @@
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
 import time
 import random
 import re
 import praw
 import helpers.general as gen
+
+dotenv_path = join(dirname(__file__), ".env")
+load_dotenv(dotenv_path)
 
 
 def reply_submission(submission):
@@ -18,7 +24,7 @@ def reply_submission(submission):
     submission.reply(body=msg)
     notif = f"[POST] https://www.reddit.com{submission.permalink} with {msg}"
     print(notif)
-    gen.post_webhook({"content": notif})
+    gen.post_webhook({"content": notif}, os.environ.get("WEBHOOK_URL"))
 
 
 def reply_mention(mention):
@@ -34,7 +40,7 @@ def reply_mention(mention):
     mention.reply(body=msg)
     notif = f"[MENTION] https://www.reddit.com{mention.permalink} with {msg}"
     print(notif)
-    gen.post_webhook({"content": notif})
+    gen.post_webhook({"content": notif}, os.environ.get("WEBHOOK_URL"))
 
 
 def reply_gratitude(comment):
@@ -48,7 +54,7 @@ def reply_gratitude(comment):
     comment.reply(body=msg)
     notif = f"[THANK] https://www.reddit.com{comment.permalink} with {msg}"
     print(notif)
-    gen.post_webhook({"content": notif})
+    gen.post_webhook({"content": notif}, os.environ.get("WEBHOOK_URL"))
 
 
 def reply_custom(comment, msg):
@@ -59,7 +65,7 @@ def reply_custom(comment, msg):
     comment.reply(body=msg)
     notif = f"[CUSTOM] https://www.reddit.com{comment.permalink} with {msg}"
     print(notif)
-    gen.post_webhook({"content": notif})
+    gen.post_webhook({"content": notif}, os.environ.get("WEBHOOK_URL"))
 
 
 def already_replied_submission(submission, username):
