@@ -18,9 +18,9 @@ def reply_submission(submission):
     if there are multiple messages, the first messages has a
     50% chance of being selected.
     """
-    reply_text_messages = gen.try_import_messages("messages/mention.txt")
-    reply_text_weights = gen.assign_random_weights(reply_text_messages)
-    msg = random.choices(reply_text_messages, weights=reply_text_weights, k=1)
+    reply_messages = gen.try_import_messages("messages/mention.txt")
+    reply_weights = gen.assign_random_weights(reply_messages)
+    msg = random.choices(reply_messages, weights=reply_weights, k=1)[0]
     submission.reply(body=msg)
     notif = f"[POST] https://www.reddit.com{submission.permalink} with {msg}"
     print(notif)
@@ -34,9 +34,9 @@ def reply_mention(mention):
     if there are multiple messages, the first messages has a
     50% chance of being selected.
     """
-    reply_text_messages = gen.try_import_messages("messages/mention.txt")
-    reply_text_weights = gen.assign_random_weights(reply_text_messages)
-    msg = random.choices(reply_text_messages, weights=reply_text_weights, k=1)
+    reply_messages = gen.try_import_messages("messages/mention.txt")
+    reply_weights = gen.assign_random_weights(reply_messages)
+    msg = random.choices(reply_messages, weights=reply_weights, k=1)[0]
     mention.reply(body=msg)
     notif = f"[MENTION] https://www.reddit.com{mention.permalink} with {msg}"
     print(notif)
@@ -49,8 +49,8 @@ def reply_gratitude(comment):
     attempts to retrieve messages from messages/thank.txt.
     all messages have equal chance of being selected.
     """
-    reply_text_messages = gen.try_import_messages("messages/thank.txt")
-    msg = random.choice(reply_text_messages)
+    reply_messages = gen.try_import_messages("messages/thank.txt")
+    msg = random.choice(reply_messages)
     comment.reply(body=msg)
     notif = f"[THANK] https://www.reddit.com{comment.permalink} with {msg}"
     print(notif)
