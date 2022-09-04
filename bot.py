@@ -24,10 +24,7 @@ reddit = praw.Reddit(
 
 def main():
     print(reddit.user.me())
-    general.post_webhook(
-        {"content": f"logged in as {reddit.user.me()}"},
-        os.environ.get("WEBHOOK_URL")
-    )
+    general.post_webhook({"content": f"logged in as {reddit.user.me()}"})
 
     subreddits = reddit.subreddit(SUBREDDITS)
     comment_stream = subreddits.stream.comments(pause_after=-1)

@@ -1,7 +1,13 @@
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
 import sys
 import requests
 import json
 import yaml
+
+dotenv_path = join(dirname(__file__), ".env")
+load_dotenv(dotenv_path)
 
 
 def exit_signal_handler(signal, frame):
@@ -68,10 +74,10 @@ def assign_random_weights(list):
     return weights
 
 
-def post_webhook(data, url):
+def post_webhook(data, url=os.environ.get("WEBHOOK_URL")):
     req = requests.post(
         url=url,
         data=json.dumps(data),
         headers={"Content-Type": "application/json"},
     )
-    print(req.status_code)
+    return req.status_code
