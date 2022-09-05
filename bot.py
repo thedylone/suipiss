@@ -1,6 +1,7 @@
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
+import argparse
 import praw
 import signal
 from helpers import general, func
@@ -12,6 +13,7 @@ config = general.try_load_config("config.yaml")
 USERNAME = os.environ.get("BOT_USERNAME")
 SUBREDDITS = config.get("SUBREDDITS", "okbuddyhololive")
 KEYWORD = config.get("KEYWORD", USERNAME)
+DEBUG_MODE = False
 
 reddit = praw.Reddit(
     user_agent=os.environ.get("USER_AGENT"),
@@ -24,7 +26,8 @@ reddit = praw.Reddit(
 
 def main():
     print(reddit.user.me())
-    general.post_webhook({"content": f"logged in as {reddit.user.me()}"})
+    if not DEBUG_MODE:
+        general.post_webhook({"content": f"logged in as {reddit.user.me()}"})
 
     subreddits = reddit.subreddit(SUBREDDITS)
     comment_stream = subreddits.stream.comments(pause_after=-1)
@@ -40,18 +43,26 @@ def main():
             if func.comment_is_self(comment, USERNAME, 1):
                 gratitude = ["thank", "good", "love"]
                 if func.keyword_in_comment(comment, *gratitude):
-                    func.reply_gratitude(comment)
+                    func.reply_gratitude(comment=comment, debug=DEBUG_MODE)
                     continue
             if func.comment_is_self(comment, USERNAME, 2):
                 if comment.author.name == "B0tRank":
-                    func.reply_custom(comment, "bot??? not bot")
+                    func.reply_custom(
+                        comment=comment,
+                        msg="bot??? not bot",
+                        debug=DEBUG_MODE,
+                    )
                     continue
             if func.keyword_in_comment(comment, KEYWORD):
                 if comment.author.name == "pekofy_bot":
-                    func.reply_custom(comment, "suipiss peko suipiss peko")
+                    func.reply_custom(
+                        comment=comment,
+                        msg="suipiss peko suipiss peko",
+                        debug=DEBUG_MODE,
+                    )
                 elif not func.comment_is_self(comment, USERNAME, 1):
                     # dont reply to own comment to prevent spam
-                    func.reply_mention(comment)
+                    func.reply_mention(mention=comment, debug=DEBUG_MODE)
                 continue
 
         for submission in submission_stream:
@@ -60,11 +71,21 @@ def main():
             if func.already_replied_submission(submission, USERNAME):
                 continue
             if func.keyword_in_submission(submission, KEYWORD):
-                func.reply_submission(submission)
+                func.reply_submission(submission=submission, debug=DEBUG_MODE)
                 continue
 
 
 if __name__ == "__main__":
-    signal.signal(signal.SIGTERM, general.exit_signal_handler)
-    signal.signal(signal.SIGINT, general.exit_signal_handler)
+    parser = argparse.ArgumentParser(description="run reddit bot")
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="run in debug mode",
+    )
+    args = parser.parse_args()
+    DEBUG_MODE = args.debug
+    if not DEBUG_MODE:
+        signal.signal(signal.SIGTERM, general.exit_signal_handler)
+        signal.signal(signal.SIGINT, general.exit_signal_handler)
     main()

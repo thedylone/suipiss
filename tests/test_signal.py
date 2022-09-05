@@ -10,7 +10,7 @@ class TestSignal(unittest.TestCase):
         if os.name == "nt":
             # windows
             proc = subprocess.Popen(
-                ["python", "bot.py"],
+                ["python", "bot.py", "--debug"],
                 shell=False,
                 creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
             )
@@ -23,7 +23,7 @@ class TestSignal(unittest.TestCase):
         elif os.name == "posix":
             # linux
             proc = subprocess.Popen(
-                ["python", "bot.py"],
+                ["python", "bot.py", "--debug"],
                 shell=False,
                 preexec_fn=os.setpgrp,
             )

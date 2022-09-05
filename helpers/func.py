@@ -5,61 +5,113 @@ import praw
 import helpers.general as gen
 
 
-def reply_submission(submission):
+def reply_submission(submission, webhook=True, debug=False):
     """
     submits a comment to a submission.
     attempts to retrieve messages from messages/mention.txt.
     if there are multiple messages, the first messages has a
     50% chance of being selected.
+    return True if successful.
     """
     reply_messages = gen.try_import_messages("messages/mention.txt")
     reply_weights = gen.assign_random_weights(reply_messages)
     msg = random.choices(reply_messages, weights=reply_weights, k=1)[0]
-    submission.reply(body=msg)
     notif = f"[POST] https://www.reddit.com{submission.permalink} with {msg}"
     print(notif)
-    gen.post_webhook({"content": notif})
+    if debug:
+        print("debug: assume reply successful")
+        return True
+    else:
+        try:
+            submission.reply(body=msg)
+            if webhook:
+                gen.post_webhook({"content": notif})
+            return True
+        except Exception as e:
+            print(e)
+            if webhook:
+                gen.post_webhook({"content": e})
+            return False
 
 
-def reply_mention(mention):
+def reply_mention(mention, webhook=True, debug=False):
     """
     submits a comment as a reply to a mentioned comment.
     attempts to retrieve messages from messages/mention.txt.
     if there are multiple messages, the first messages has a
     50% chance of being selected.
+    return True if successful.
     """
     reply_messages = gen.try_import_messages("messages/mention.txt")
     reply_weights = gen.assign_random_weights(reply_messages)
     msg = random.choices(reply_messages, weights=reply_weights, k=1)[0]
-    mention.reply(body=msg)
     notif = f"[MENTION] https://www.reddit.com{mention.permalink} with {msg}"
     print(notif)
-    gen.post_webhook({"content": notif})
+    if debug:
+        print("debug: assume reply successful")
+        return True
+    else:
+        try:
+            mention.reply(body=msg)
+            if webhook:
+                gen.post_webhook({"content": notif})
+            return True
+        except Exception as e:
+            print(e)
+            if webhook:
+                gen.post_webhook({"content": e})
+            return False
 
 
-def reply_gratitude(comment):
+def reply_gratitude(comment, webhook=True, debug=False):
     """
     submits a comment as a reply to a comment thanking the bot.
     attempts to retrieve messages from messages/thank.txt.
     all messages have equal chance of being selected.
+    return True if successful.
     """
     reply_messages = gen.try_import_messages("messages/thank.txt")
     msg = random.choice(reply_messages)
-    comment.reply(body=msg)
     notif = f"[THANK] https://www.reddit.com{comment.permalink} with {msg}"
     print(notif)
-    gen.post_webhook({"content": notif})
+    if debug:
+        print("debug: assume reply successful")
+        return True
+    else:
+        try:
+            comment.reply(body=msg)
+            if webhook:
+                gen.post_webhook({"content": notif})
+            return True
+        except Exception as e:
+            print(e)
+            if webhook:
+                gen.post_webhook({"content": e})
+            return False
 
 
-def reply_custom(comment, msg):
+def reply_custom(comment, msg, webhook=True, debug=False):
     """
     submits a comment as a reply to a comment
     with a custom reply message.
+    returns True if successful.
     """
-    comment.reply(body=msg)
     notif = f"[CUSTOM] https://www.reddit.com{comment.permalink} with {msg}"
     print(notif)
-    gen.post_webhook({"content": notif})
+    if debug:
+        print("debug: assume reply successful")
+        return True
+    else:
+        try:
+            comment.reply(body=msg)
+            if webhook:
+                gen.post_webhook({"content": notif})
+            return True
+        except Exception as e:
+            print(e)
+            if webhook:
+                gen.post_webhook({"content": e})
+            return False
 
 
 def already_replied_submission(submission, username):
