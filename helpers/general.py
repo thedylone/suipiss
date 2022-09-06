@@ -18,6 +18,10 @@ def exit_signal_handler(signal, frame):
 
 
 def try_load_config(path):
+    """
+    attempts to read a config yaml file and returns the config
+    if successful. raises error if config file cannot be read.
+    """
     try:
         with open(path, "r") as f:
             config = yaml.safe_load(f)

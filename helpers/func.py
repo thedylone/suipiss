@@ -162,11 +162,19 @@ def comment_is_self(comment, username, parent_level=0):
 
 
 def keyword_in_comment(comment, *keywords):
+    """
+    check if any keywords appear in comment body text.
+    keywords should be lowercase, alphanumeric only, no spaces.
+    """
     body = re.sub("[^a-z0-9]", "", comment.body.lower())
     return any(key in body for key in keywords)
 
 
 def keyword_in_submission(submission, *keywords):
+    """
+    check if any keywords appear in submission title or body text.
+    keywords should be lowercase, alphanumeric only, no spaces.
+    """
     title = re.sub("[^a-z0-9]", "", submission.title.lower())
     text = re.sub("[^a-z0-9]", "", submission.selftext.lower())
     return any(key in title or key in text for key in keywords)
