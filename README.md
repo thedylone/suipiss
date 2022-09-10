@@ -4,6 +4,8 @@ suipiss bot is a reddit bot that responds to this keyword: `suipiss`.
 
 it is currently running on [u/suipiss](https://www.reddit.com/user/suipiss), serving the [r/okbuddyhololive subreddit](https://www.reddit.com/r/okbuddyhololive/).
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Z8Z0EY6XA)
+
 ## what is suipiss?
 
 it's complicated
