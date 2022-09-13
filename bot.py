@@ -57,4 +57,9 @@ if __name__ == "__main__":
     if not DEBUG_MODE:
         signal.signal(signal.SIGTERM, general.exit_signal_handler)
         signal.signal(signal.SIGINT, general.exit_signal_handler)
-    main()
+    try:
+        main()
+    except Exception as e:
+        if not DEBUG_MODE:
+            general.post_webhook({"content": f"fatal error encountered: {e}"})
+        raise e
