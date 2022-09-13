@@ -3,7 +3,7 @@ import praw
 from helpers.func import (
     already_replied_submission,
     already_replied_comment,
-    comment_is_self,
+    comment_is_user,
     keyword_in_comment,
     keyword_in_submission,
 )
@@ -41,31 +41,31 @@ class TestFunc(unittest.TestCase):
             already_replied_comment(comment(reddit, "hywwnfq"), USERNAME)
         )
 
-    def test_comment_is_self(self):
+    def test_comment_is_user(self):
         comment = praw.models.Comment
         # test comment is self
-        self.assertTrue(comment_is_self(comment(reddit, "hywwf45"), USERNAME))
+        self.assertTrue(comment_is_user(comment(reddit, "hywwf45"), USERNAME))
         # test comment parent is self
         self.assertTrue(
-            comment_is_self(comment(reddit, "icgxdy9"), USERNAME, 1)
+            comment_is_user(comment(reddit, "icgxdy9"), USERNAME, 1)
         )
         # test comment parent parent is self
         self.assertTrue(
-            comment_is_self(comment(reddit, "ilzt04v"), USERNAME, 2)
+            comment_is_user(comment(reddit, "ilzt04v"), USERNAME, 2)
         )
         # test comment not self
-        self.assertFalse(comment_is_self(comment(reddit, "icgxdy9"), USERNAME))
+        self.assertFalse(comment_is_user(comment(reddit, "icgxdy9"), USERNAME))
         # test comment parent not self
         self.assertFalse(
-            comment_is_self(comment(reddit, "ilzt04v"), USERNAME, 1)
+            comment_is_user(comment(reddit, "ilzt04v"), USERNAME, 1)
         )
         # test top comment parent
         self.assertFalse(
-            comment_is_self(comment(reddit, "icgx9xu"), USERNAME, 1)
+            comment_is_user(comment(reddit, "icgx9xu"), USERNAME, 1)
         )
         # test top comment parent parent
         self.assertFalse(
-            comment_is_self(comment(reddit, "icgx9xu"), USERNAME, 2)
+            comment_is_user(comment(reddit, "icgx9xu"), USERNAME, 2)
         )
 
     def test_keyword_in_comment(self):

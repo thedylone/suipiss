@@ -36,43 +36,12 @@ def main():
         for comment in comment_stream:
             if comment is None:
                 break
-            if func.comment_is_self(comment, USERNAME):
-                continue
-            if func.already_replied_comment(comment, USERNAME):
-                continue
-            if func.comment_is_self(comment, USERNAME, 1):
-                gratitude = ["thank", "good", "love"]
-                if func.keyword_in_comment(comment, *gratitude):
-                    func.reply_gratitude(comment=comment, debug=DEBUG_MODE)
-                    continue
-            if func.comment_is_self(comment, USERNAME, 2):
-                if comment.author.name == "B0tRank":
-                    func.reply_custom(
-                        comment=comment,
-                        msg="bot??? not bot",
-                        debug=DEBUG_MODE,
-                    )
-                    continue
-            if func.keyword_in_comment(comment, KEYWORD):
-                if comment.author.name == "pekofy_bot":
-                    func.reply_custom(
-                        comment=comment,
-                        msg="suipiss peko suipiss peko",
-                        debug=DEBUG_MODE,
-                    )
-                elif not func.comment_is_self(comment, USERNAME, 1):
-                    # dont reply to own comment to prevent spam
-                    func.reply_mention(mention=comment, debug=DEBUG_MODE)
-                continue
+            func.comment_logic(comment, USERNAME, KEYWORD, DEBUG_MODE)
 
         for submission in submission_stream:
             if submission is None:
                 break
-            if func.already_replied_submission(submission, USERNAME):
-                continue
-            if func.keyword_in_submission(submission, KEYWORD):
-                func.reply_submission(submission=submission, debug=DEBUG_MODE)
-                continue
+            func.submission_logic(submission, USERNAME, KEYWORD, DEBUG_MODE)
 
 
 if __name__ == "__main__":

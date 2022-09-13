@@ -5,6 +5,52 @@ import praw
 import helpers.general as gen
 
 
+def comment_logic(comment, username, keyword, debug=False):
+    """handle the logic for comments"""
+    if comment_is_user(comment, username):
+        # ignore own comments
+        return
+    if already_replied_comment(comment, username):
+        # prevent spam, don't reply again
+        return
+    if comment_is_user(comment, username, 1):
+        # parent is user
+        gratitude = ["thank", "good", "love"]
+        if keyword_in_comment(comment, *gratitude):
+            reply_gratitude(comment=comment, debug=debug)
+            return
+    if comment_is_user(comment, username, 2):
+        # parent's parent is user
+        if comment.author.name == "B0tRank":
+            reply_custom(
+                comment=comment,
+                msg="bot??? not bot",
+                debug=debug,
+            )
+            return
+    if keyword_in_comment(comment, keyword):
+        if comment.author.name == "pekofy_bot":
+            reply_custom(
+                comment=comment,
+                msg="suipiss peko suipiss peko",
+                debug=debug,
+            )
+        elif not comment_is_user(comment, username, 1):
+            # dont reply to own comment to prevent spam
+            reply_mention(mention=comment, debug=debug)
+        return
+
+
+def submission_logic(submission, username, keyword, debug=False):
+    """handle the logic for submissions"""
+    if already_replied_submission(submission, username):
+        # prevent spam, don't reply again
+        return
+    if keyword_in_submission(submission, keyword):
+        reply_submission(submission=submission, debug=debug)
+        return
+
+
 def reply_submission(submission, webhook=True, debug=False):
     """
     submits a comment to a submission.
@@ -150,7 +196,7 @@ def already_replied_comment(comment, username):
     return False
 
 
-def comment_is_self(comment, username, parent_level=0):
+def comment_is_user(comment, username, parent_level=0):
     """checks if a comment's author is the user"""
     while parent_level > 0:
         if hasattr(comment, "parent"):
