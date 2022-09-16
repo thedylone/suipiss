@@ -6,6 +6,7 @@ from helpers.func import (
     comment_is_user,
     keyword_in_comment,
     keyword_in_submission,
+    comment_logic,
 )
 from bot import reddit, USERNAME
 
@@ -105,6 +106,114 @@ class TestFunc(unittest.TestCase):
         self.assertFalse(
             keyword_in_submission(submission(reddit, "tzry2q"), "suipiss")
         )
+
+    def test_comment_logic(self):
+        comment = praw.models.Comment
+        username = "suipiss"
+        keyword = "suipiss"
+        # test comment is self
+        self.assertEqual(
+            comment_logic(comment(reddit, "hywwf45"), username, keyword, True),
+            "comment is self",
+        )
+        # test comment already replied
+        self.assertEqual(
+            comment_logic(comment(reddit, "hz208fy"), username, keyword, True),
+            "already replied",
+        )
+        # test parent is user
+        fake_reply = FakeComment()
+        parent_comment = FakeComment(
+            author=FakeRedditor(username),
+            replies=FakeCommentForest(None),
+        )
+        fake_comment = FakeComment(
+            author=FakeRedditor("not self"),
+            parent_comment=parent_comment,
+            replies=FakeCommentForest([fake_reply]),
+        )
+        fake_reply.parent_comment = fake_comment
+        self.assertEqual(
+            comment_logic(fake_comment, username, keyword, True),
+            "parent is self",
+        )
+        # test reply gratitude
+        fake_comment.body = "thanks"
+        self.assertEqual(
+            comment_logic(fake_comment, username, keyword, True),
+            "reply gratitude",
+        )
+        # test parent parent is user
+        parent_parent_comment = FakeComment(author=FakeRedditor(username))
+        parent_comment.parent_comment = parent_parent_comment
+        parent_comment.author = FakeRedditor("not self")
+        self.assertEqual(
+            comment_logic(fake_comment, username, keyword, True),
+            "parent parent is self",
+        )
+        # test B0tRank
+        fake_comment.author = FakeRedditor("B0tRank")
+        self.assertEqual(
+            comment_logic(fake_comment, username, keyword, True),
+            "B0tRank",
+        )
+        # test reply mention
+        parent_parent_comment.author = FakeRedditor("not self")
+        fake_comment.body = keyword
+        self.assertEqual(
+            comment_logic(fake_comment, username, keyword, True),
+            "reply mention",
+        )
+        # test pekofy_bot
+        fake_comment.author = FakeRedditor("pekofy_bot")
+        self.assertEqual(
+            comment_logic(fake_comment, username, keyword, True),
+            "pekofy_bot",
+        )
+
+
+class FakeRedditor:
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return self.name
+
+    def __eq__(self, string: str):
+        return self.name == string
+
+
+class FakeCommentForest:
+    def __init__(self, comments):
+        self.comments = comments
+
+    def list(self):
+        return self.comments
+
+    def replace_more(self):
+        return
+
+
+class FakeComment:
+    def __init__(
+        self,
+        author=None,
+        body="",
+        id=None,
+        parent_comment=None,
+        replies=None,
+    ):
+        self.author = author
+        self.body = body
+        self.id = id
+        self.parent_comment = parent_comment
+        self.replies = replies
+
+    def parent(self):
+        return self.parent_comment
+
+    def refresh(self):
+        return
 
 
 if __name__ == "__main__":

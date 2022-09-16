@@ -9,36 +9,51 @@ def comment_logic(comment, username, keyword, debug=False):
     """handle the logic for comments"""
     if comment_is_user(comment, username):
         # ignore own comments
-        return
+        return "comment is self"
     if already_replied_comment(comment, username):
         # prevent spam, don't reply again
-        return
+        return "already replied"
     if comment_is_user(comment, username, 1):
         # parent is user
         gratitude = ["thank", "good", "love"]
         if keyword_in_comment(comment, *gratitude):
+            if debug:
+                return "reply gratitude"
             reply_gratitude(comment=comment, debug=debug)
             return
+        if debug:
+            return "parent is self"
     if comment_is_user(comment, username, 2):
         # parent's parent is user
         if comment.author.name == "B0tRank":
+            if debug:
+                return "B0tRank"
             reply_custom(
                 comment=comment,
                 msg="bot??? not bot",
                 debug=debug,
             )
             return
+        if debug:
+            return "parent parent is self"
     if keyword_in_comment(comment, keyword):
         if comment.author.name == "pekofy_bot":
+            if debug:
+                return "pekofy_bot"
             reply_custom(
                 comment=comment,
                 msg="suipiss peko suipiss peko",
                 debug=debug,
             )
-        elif not comment_is_user(comment, username, 1):
-            # dont reply to own comment to prevent spam
+            return
+        if not comment_is_user(comment, username, 1):
+            # dont reply to own comment's reply to prevent spam
+            if debug:
+                return "reply mention"
             reply_mention(mention=comment, debug=debug)
-        return
+            return
+        if debug:
+            return "keyword in comment (no reply)"
 
 
 def submission_logic(submission, username, keyword, debug=False):
