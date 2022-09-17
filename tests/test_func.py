@@ -7,6 +7,7 @@ from helpers.func import (
     keyword_in_comment,
     keyword_in_submission,
     comment_logic,
+    submission_logic,
 )
 from bot import reddit, USERNAME
 
@@ -122,17 +123,14 @@ class TestFunc(unittest.TestCase):
             "already replied",
         )
         # test parent is user
-        fake_reply = FakeComment()
         parent_comment = FakeComment(
             author=FakeRedditor(username),
-            replies=FakeCommentForest(None),
         )
         fake_comment = FakeComment(
             author=FakeRedditor("not self"),
             parent_comment=parent_comment,
-            replies=FakeCommentForest([fake_reply]),
+            replies=FakeCommentForest([]),
         )
-        fake_reply.parent_comment = fake_comment
         self.assertEqual(
             comment_logic(fake_comment, username, keyword, True),
             "parent is self",
@@ -171,6 +169,30 @@ class TestFunc(unittest.TestCase):
             "pekofy_bot",
         )
 
+    def test_submission_logic(self):
+        submission = praw.models.Submission
+        username = "suipiss"
+        keyword = "suipiss"
+        # test already replied
+        self.assertEqual(
+            submission_logic(
+                submission(reddit, "t48wjd"), username, keyword, True
+            ),
+            "already replied",
+        )
+        # test reply submission from title
+        fake_submission = FakeSubmission(title=keyword)
+        self.assertEqual(
+            submission_logic(fake_submission, username, keyword, True),
+            "reply submission",
+        )
+        # test reply submission from selftext
+        fake_submission = FakeSubmission(selftext=keyword)
+        self.assertEqual(
+            submission_logic(fake_submission, username, keyword, True),
+            "reply submission",
+        )
+
 
 class FakeRedditor:
     def __init__(self, name):
@@ -201,7 +223,7 @@ class FakeComment:
         body="",
         id=None,
         parent_comment=None,
-        replies=None,
+        replies=[],
     ):
         self.author = author
         self.body = body
@@ -214,6 +236,22 @@ class FakeComment:
 
     def refresh(self):
         return
+
+
+class FakeSubmission:
+    def __init__(
+        self,
+        author=None,
+        comments=[],
+        id=None,
+        selftext="",
+        title="",
+    ):
+        self.author = author
+        self.comments = comments
+        self.id = id
+        self.selftext = selftext
+        self.title = title
 
 
 if __name__ == "__main__":

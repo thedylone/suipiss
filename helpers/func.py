@@ -60,8 +60,10 @@ def submission_logic(submission, username, keyword, debug=False):
     """handle the logic for submissions"""
     if already_replied_submission(submission, username):
         # prevent spam, don't reply again
-        return
+        return "already replied"
     if keyword_in_submission(submission, keyword):
+        if debug:
+            return "reply submission"
         reply_submission(submission=submission, debug=debug)
         return
 
