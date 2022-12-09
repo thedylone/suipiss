@@ -5,7 +5,7 @@ import praw
 import helpers.general as gen
 
 
-def comment_logic(comment, username, keyword, debug=False):
+def comment_logic(comment, username, keyword, path="custom.yaml", debug=False):
     """handle the logic for comments"""
     if comment_is_user(comment, username):
         # ignore own comments
@@ -23,29 +23,24 @@ def comment_logic(comment, username, keyword, debug=False):
             return
         if debug:
             return "parent is self"
-    if comment_is_user(comment, username, 2):
-        # parent's parent is user
-        if comment.author.name == "B0tRank":
+    custom_logic = gen.try_load_config(path)
+    for custom in custom_logic.get("parent_is_self", []):
+        if comment_is_user(
+            comment, username, custom.get("level")
+        ) and comment.author.name == custom.get("author"):
+            msg = custom.get("msg")
             if debug:
-                return "B0tRank"
-            reply_custom(
-                comment=comment,
-                msg="bot??? not bot",
-                debug=debug,
-            )
+                return msg
+            reply_custom(comment=comment, msg=msg, debug=debug)
             return
-        if debug:
-            return "parent parent is self"
     if keyword_in_comment(comment, keyword):
-        if comment.author.name == "pekofy_bot":
-            if debug:
-                return "pekofy_bot"
-            reply_custom(
-                comment=comment,
-                msg="suipiss peko suipiss peko",
-                debug=debug,
-            )
-            return
+        for custom in custom_logic.get("keyword_in_comment", []):
+            if comment.author.name == custom.get("author"):
+                msg = custom.get("msg")
+                if debug:
+                    return msg
+                reply_custom(comment=comment, msg=msg, debug=debug)
+                return
         if not comment_is_user(comment, username, 1):
             # dont reply to own comment's reply to prevent spam
             if debug:

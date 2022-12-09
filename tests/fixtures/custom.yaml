@@ -1,0 +1,14 @@
+parent_is_self:
+- level: 2
+  author: B0tRank
+  msg: "bot??? not bot"
+- level: 2
+  author: pekofy_bot
+  msg: "ok thanks pekofy_bot"
+- level: 2
+  author: NanoraBot
+  msg: lunapiss
+
+keyword_in_comment:
+- author: pekofy_bot
+  msg: "suipiss peko"

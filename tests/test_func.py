@@ -110,16 +110,29 @@ class TestFunc(unittest.TestCase):
 
     def test_comment_logic(self):
         comment = praw.models.Comment
+        path = ("tests/fixtures/custom.yaml")
         username = "suipiss"
         keyword = "suipiss"
         # test comment is self
         self.assertEqual(
-            comment_logic(comment(reddit, "hywwf45"), username, keyword, True),
+            comment_logic(
+                comment(reddit, "hywwf45"),
+                username,
+                keyword,
+                path=path,
+                debug=True,
+            ),
             "comment is self",
         )
         # test comment already replied
         self.assertEqual(
-            comment_logic(comment(reddit, "hz208fy"), username, keyword, True),
+            comment_logic(
+                comment(reddit, "hz208fy"),
+                username,
+                keyword,
+                path=path,
+                debug=True,
+            ),
             "already replied",
         )
         # test parent is user
@@ -132,41 +145,65 @@ class TestFunc(unittest.TestCase):
             replies=FakeCommentForest([]),
         )
         self.assertEqual(
-            comment_logic(fake_comment, username, keyword, True),
+            comment_logic(
+                fake_comment, username, keyword, path=path, debug=True
+            ),
             "parent is self",
         )
         # test reply gratitude
         fake_comment.body = "thanks"
         self.assertEqual(
-            comment_logic(fake_comment, username, keyword, True),
+            comment_logic(
+                fake_comment, username, keyword, path=path, debug=True
+            ),
             "reply gratitude",
         )
-        # test parent parent is user
+        # test custom
         parent_parent_comment = FakeComment(author=FakeRedditor(username))
         parent_comment.parent_comment = parent_parent_comment
         parent_comment.author = FakeRedditor("not self")
-        self.assertEqual(
-            comment_logic(fake_comment, username, keyword, True),
-            "parent parent is self",
-        )
         # test B0tRank
         fake_comment.author = FakeRedditor("B0tRank")
         self.assertEqual(
-            comment_logic(fake_comment, username, keyword, True),
-            "B0tRank",
-        )
-        # test reply mention
-        parent_parent_comment.author = FakeRedditor("not self")
-        fake_comment.body = keyword
-        self.assertEqual(
-            comment_logic(fake_comment, username, keyword, True),
-            "reply mention",
+            comment_logic(
+                fake_comment,
+                username,
+                keyword,
+                path=path,
+                debug=True,
+            ),
+            "bot??? not bot",
         )
         # test pekofy_bot
         fake_comment.author = FakeRedditor("pekofy_bot")
         self.assertEqual(
-            comment_logic(fake_comment, username, keyword, True),
-            "pekofy_bot",
+            comment_logic(
+                fake_comment,
+                username,
+                keyword,
+                path=path,
+                debug=True,
+            ),
+            "ok thanks pekofy_bot",
+        )
+        # test mentioned keyword
+        parent_parent_comment.author = FakeRedditor("not self")
+        fake_comment.body = keyword
+
+        # test pekofy_bot reply mention
+        self.assertEqual(
+            comment_logic(
+                fake_comment, username, keyword, path=path, debug=True
+            ),
+            "suipiss peko",
+        )
+        # test reply
+        fake_comment.author = FakeRedditor("not self")
+        self.assertEqual(
+            comment_logic(
+                fake_comment, username, keyword, path=path, debug=True
+            ),
+            "reply mention",
         )
 
     def test_submission_logic(self):
@@ -176,20 +213,20 @@ class TestFunc(unittest.TestCase):
         # test already replied
         self.assertEqual(
             submission_logic(
-                submission(reddit, "t48wjd"), username, keyword, True
+                submission(reddit, "t48wjd"), username, keyword, debug=True
             ),
             "already replied",
         )
         # test reply submission from title
         fake_submission = FakeSubmission(title=keyword)
         self.assertEqual(
-            submission_logic(fake_submission, username, keyword, True),
+            submission_logic(fake_submission, username, keyword, debug=True),
             "reply submission",
         )
         # test reply submission from selftext
         fake_submission = FakeSubmission(selftext=keyword)
         self.assertEqual(
-            submission_logic(fake_submission, username, keyword, True),
+            submission_logic(fake_submission, username, keyword, debug=True),
             "reply submission",
         )
 
