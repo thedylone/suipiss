@@ -36,12 +36,14 @@ def main():
         for comment in comment_stream:
             if comment is None:
                 break
-            func.comment_logic(comment, USERNAME, KEYWORD, DEBUG_MODE)
+            func.comment_logic(comment, USERNAME, KEYWORD, debug=DEBUG_MODE)
 
         for submission in submission_stream:
             if submission is None:
                 break
-            func.submission_logic(submission, USERNAME, KEYWORD, DEBUG_MODE)
+            func.submission_logic(
+                submission, USERNAME, KEYWORD, debug=DEBUG_MODE
+            )
 
 
 if __name__ == "__main__":
