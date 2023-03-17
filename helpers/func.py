@@ -197,7 +197,7 @@ def already_replied_comment(comment, username):
                 return True
             time.sleep(10)
             second_refresh = True
-    comment.replies.replace_more()
+    # comment.replies.replace_more()
     child_comments = comment.replies.list()
     for top_comment in child_comments:
         if top_comment.parent().id != comment.id:
