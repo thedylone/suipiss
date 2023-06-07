@@ -1,18 +1,20 @@
+"""main file for the bot"""
+
 import os
+import argparse
+import signal
 from os.path import join, dirname
 from dotenv import load_dotenv
-import argparse
 import praw
-import signal
 from helpers import general, func
 
 
-dotenv_path = join(dirname(__file__), ".env")
+dotenv_path: str = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
-config = general.try_load_config("config.yaml")
-USERNAME = os.environ.get("BOT_USERNAME")
-SUBREDDITS = config.get("SUBREDDITS", "okbuddyhololive")
-KEYWORD = config.get("KEYWORD", USERNAME)
+config: dict = general.try_load_config("config.yaml")
+USERNAME: str = os.environ.get("BOT_USERNAME", "suipiss")
+SUBREDDITS: str = config.get("SUBREDDITS", "okbuddyhololive")
+KEYWORD: str = config.get("KEYWORD", USERNAME)
 DEBUG_MODE = False
 
 reddit = praw.Reddit(
@@ -25,6 +27,7 @@ reddit = praw.Reddit(
 
 
 def main():
+    """main function"""
     print(reddit.user.me())
     if not DEBUG_MODE:
         general.post_webhook({"content": f"logged in as {reddit.user.me()}"})

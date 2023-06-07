@@ -1,8 +1,12 @@
+"""bot functions for reddit bot"""
+
 import time
 import random
 import re
 import praw
 import helpers.general as gen
+
+REDDIT_URL = "https://reddit.com"
 
 
 def comment_logic(comment, username, keyword, path="custom.yaml", debug=False):
@@ -15,7 +19,7 @@ def comment_logic(comment, username, keyword, path="custom.yaml", debug=False):
         return "already replied"
     if comment_is_user(comment, username, 1):
         # parent is user
-        gratitude = ["thank", "good", "love"]
+        gratitude: list[str] = ["thank", "good", "love"]
         if keyword_in_comment(comment, *gratitude):
             if debug:
                 return "reply gratitude"
@@ -23,12 +27,12 @@ def comment_logic(comment, username, keyword, path="custom.yaml", debug=False):
             return
         if debug:
             return "parent is self"
-    custom_logic = gen.try_load_config(path)
+    custom_logic: dict = gen.try_load_config(path)
     for custom in custom_logic.get("parent_is_self", []):
         if comment_is_user(
             comment, username, custom.get("level")
         ) and comment.author.name == custom.get("author"):
-            msg = custom.get("msg")
+            msg: str = custom.get("msg")
             if debug:
                 return msg
             reply_custom(comment=comment, msg=msg, debug=debug)
@@ -51,19 +55,19 @@ def comment_logic(comment, username, keyword, path="custom.yaml", debug=False):
             return "keyword in comment (no reply)"
 
 
-def submission_logic(submission, username, keyword, debug=False):
+def submission_logic(submission, username, keyword, debug=False) -> str:
     """handle the logic for submissions"""
     if already_replied_submission(submission, username):
         # prevent spam, don't reply again
         return "already replied"
     if keyword_in_submission(submission, keyword):
-        if debug:
-            return "reply submission"
-        reply_submission(submission=submission, debug=debug)
-        return
+        if not debug:
+            reply_submission(submission=submission, debug=debug)
+        return "reply submission"
+    return "no reply"
 
 
-def reply_submission(submission, webhook=True, debug=False):
+def reply_submission(submission, webhook=True, debug=False) -> bool:
     """
     submits a comment to a submission.
     attempts to retrieve messages from messages/mention.txt.
@@ -71,28 +75,27 @@ def reply_submission(submission, webhook=True, debug=False):
     50% chance of being selected.
     return True if successful.
     """
-    reply_messages = gen.try_import_messages("messages/mention.txt")
-    reply_weights = gen.assign_random_weights(reply_messages)
-    msg = random.choices(reply_messages, weights=reply_weights, k=1)[0]
-    notif = f"[POST] https://www.reddit.com{submission.permalink} with {msg}"
+    reply_messages: list[str] = gen.try_import_messages("messages/mention.txt")
+    reply_weights: list[float] = gen.assign_random_weights(reply_messages)
+    msg: str = random.choices(reply_messages, weights=reply_weights, k=1)[0]
+    notif: str = f"[POST] {REDDIT_URL}{submission.permalink} with {msg}"
     print(notif)
     if debug:
         print("debug: assume reply successful")
         return True
-    else:
-        try:
-            submission.reply(body=msg)
-            if webhook:
-                gen.post_webhook({"content": notif})
-            return True
-        except Exception as e:
-            print(e)
-            if webhook:
-                gen.post_webhook({"content": e})
-            return False
+    try:
+        submission.reply(body=msg)
+        if webhook:
+            gen.post_webhook({"content": notif})
+        return True
+    except Exception as err:
+        print(err)
+        if webhook:
+            gen.post_webhook({"content": err})
+        return False
 
 
-def reply_mention(mention, webhook=True, debug=False):
+def reply_mention(mention, webhook=True, debug=False) -> bool:
     """
     submits a comment as a reply to a mentioned comment.
     attempts to retrieve messages from messages/mention.txt.
@@ -100,90 +103,87 @@ def reply_mention(mention, webhook=True, debug=False):
     50% chance of being selected.
     return True if successful.
     """
-    reply_messages = gen.try_import_messages("messages/mention.txt")
-    reply_weights = gen.assign_random_weights(reply_messages)
-    msg = random.choices(reply_messages, weights=reply_weights, k=1)[0]
-    notif = f"[MENTION] https://www.reddit.com{mention.permalink} with {msg}"
+    reply_messages: list[str] = gen.try_import_messages("messages/mention.txt")
+    reply_weights: list[float] = gen.assign_random_weights(reply_messages)
+    msg: str = random.choices(reply_messages, weights=reply_weights, k=1)[0]
+    notif: str = f"[MENTION] {REDDIT_URL}{mention.permalink} with {msg}"
     print(notif)
     if debug:
         print("debug: assume reply successful")
         return True
-    else:
-        try:
-            mention.reply(body=msg)
-            if webhook:
-                gen.post_webhook({"content": notif})
-            return True
-        except Exception as e:
-            print(e)
-            if webhook:
-                gen.post_webhook({"content": e})
-            return False
+    try:
+        mention.reply(body=msg)
+        if webhook:
+            gen.post_webhook({"content": notif})
+        return True
+    except Exception as err:
+        print(err)
+        if webhook:
+            gen.post_webhook({"content": err})
+        return False
 
 
-def reply_gratitude(comment, webhook=True, debug=False):
+def reply_gratitude(comment, webhook=True, debug=False) -> bool:
     """
     submits a comment as a reply to a comment thanking the bot.
     attempts to retrieve messages from messages/thank.txt.
     all messages have equal chance of being selected.
     return True if successful.
     """
-    reply_messages = gen.try_import_messages("messages/thank.txt")
-    msg = random.choice(reply_messages)
-    notif = f"[THANK] https://www.reddit.com{comment.permalink} with {msg}"
+    reply_messages: list[str] = gen.try_import_messages("messages/thank.txt")
+    msg: str = random.choice(reply_messages)
+    notif: str = f"[THANK] {REDDIT_URL}{comment.permalink} with {msg}"
     print(notif)
     if debug:
         print("debug: assume reply successful")
         return True
-    else:
-        try:
-            comment.reply(body=msg)
-            if webhook:
-                gen.post_webhook({"content": notif})
-            return True
-        except Exception as e:
-            print(e)
-            if webhook:
-                gen.post_webhook({"content": e})
-            return False
+    try:
+        comment.reply(body=msg)
+        if webhook:
+            gen.post_webhook({"content": notif})
+        return True
+    except Exception as err:
+        print(err)
+        if webhook:
+            gen.post_webhook({"content": err})
+        return False
 
 
-def reply_custom(comment, msg, webhook=True, debug=False):
+def reply_custom(comment, msg, webhook=True, debug=False) -> bool:
     """
     submits a comment as a reply to a comment
     with a custom reply message.
     returns True if successful.
     """
-    notif = f"[CUSTOM] https://www.reddit.com{comment.permalink} with {msg}"
+    notif: str = f"[CUSTOM] {REDDIT_URL}{comment.permalink} with {msg}"
     print(notif)
     if debug:
         print("debug: assume reply successful")
         return True
-    else:
-        try:
-            comment.reply(body=msg)
-            if webhook:
-                gen.post_webhook({"content": notif})
-            return True
-        except Exception as e:
-            print(e)
-            if webhook:
-                gen.post_webhook({"content": e})
-            return False
+    try:
+        comment.reply(body=msg)
+        if webhook:
+            gen.post_webhook({"content": notif})
+        return True
+    except Exception as err:
+        print(err)
+        if webhook:
+            gen.post_webhook({"content": err})
+        return False
 
 
-def already_replied_submission(submission, username):
+def already_replied_submission(submission, username) -> bool:
     """checks if a submission has already been replied to."""
     for top_comment in submission.comments:
         if top_comment.parent().id != submission.id:
             break
         if top_comment.author == username:
-            print(f"same https://www.reddit.com{submission.permalink}")
+            print(f"same {REDDIT_URL}{submission.permalink}")
             return True
     return False
 
 
-def already_replied_comment(comment, username):
+def already_replied_comment(comment, username) -> bool:
     """checks if a comment has already been replied to."""
     second_refresh = False
     for _ in range(2):
@@ -203,12 +203,12 @@ def already_replied_comment(comment, username):
         if top_comment.parent().id != comment.id:
             break
         if top_comment.author == username:
-            print(f"same https://www.reddit.com{comment.permalink}")
+            print(f"same {REDDIT_URL}{comment.permalink}")
             return True
     return False
 
 
-def comment_is_user(comment, username, parent_level=0):
+def comment_is_user(comment, username, parent_level=0) -> bool:
     """checks if a comment's author is the user"""
     while parent_level > 0:
         if hasattr(comment, "parent"):
@@ -219,20 +219,20 @@ def comment_is_user(comment, username, parent_level=0):
     return comment.author and comment.author == username
 
 
-def keyword_in_comment(comment, *keywords):
+def keyword_in_comment(comment, *keywords) -> bool:
     """
     check if any keywords appear in comment body text.
     keywords should be lowercase, alphanumeric only, no spaces.
     """
-    body = re.sub("[^a-z0-9]", "", comment.body.lower())
+    body: str = re.sub("[^a-z0-9]", "", comment.body.lower())
     return any(key in body for key in keywords)
 
 
-def keyword_in_submission(submission, *keywords):
+def keyword_in_submission(submission, *keywords) -> bool:
     """
     check if any keywords appear in submission title or body text.
     keywords should be lowercase, alphanumeric only, no spaces.
     """
-    title = re.sub("[^a-z0-9]", "", submission.title.lower())
-    text = re.sub("[^a-z0-9]", "", submission.selftext.lower())
+    title: str = re.sub("[^a-z0-9]", "", submission.title.lower())
+    text: str = re.sub("[^a-z0-9]", "", submission.selftext.lower())
     return any(key in title or key in text for key in keywords)
