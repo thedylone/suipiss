@@ -1,3 +1,5 @@
+"""test signal handling"""
+
 import os
 import unittest
 import subprocess
@@ -6,7 +8,9 @@ import signal
 
 
 class TestSignal(unittest.TestCase):
+    """test signal handling"""
     def test_signal(self):
+        """test signal handling"""
         if os.name == "nt":
             # windows
             proc = subprocess.Popen(

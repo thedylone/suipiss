@@ -35,11 +35,18 @@ def main():
     subreddits = reddit.subreddit(SUBREDDITS)
     comment_stream = subreddits.stream.comments(pause_after=-1)
     submission_stream = subreddits.stream.submissions(pause_after=-1)
+    custom_logic: dict = general.try_load_config("custom.yaml")
     while True:
         for comment in comment_stream:
             if comment is None:
                 break
-            func.comment_logic(comment, USERNAME, KEYWORD, debug=DEBUG_MODE)
+            func.comment_logic(
+                comment,
+                USERNAME,
+                KEYWORD,
+                custom_logic=custom_logic,
+                debug=DEBUG_MODE,
+            )
 
         for submission in submission_stream:
             if submission is None:

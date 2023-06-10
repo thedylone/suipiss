@@ -9,7 +9,9 @@ import helpers.general as gen
 REDDIT_URL = "https://reddit.com"
 
 
-def comment_logic(comment, username, keyword, path="custom.yaml", debug=False):
+def comment_logic(
+    comment, username, keyword, custom_logic, debug=False
+) -> str:
     """handle the logic for comments"""
     if comment_is_user(comment, username):
         # ignore own comments
@@ -21,38 +23,48 @@ def comment_logic(comment, username, keyword, path="custom.yaml", debug=False):
         # parent is user
         gratitude: list[str] = ["thank", "good", "love"]
         if keyword_in_comment(comment, *gratitude):
-            if debug:
-                return "reply gratitude"
-            reply_gratitude(comment=comment, debug=debug)
-            return
+            return (
+                "replied"
+                if reply_gratitude(comment=comment, debug=debug)
+                else "failed"
+            )
         if debug:
             return "parent is self"
-    custom_logic: dict = gen.try_load_config(path)
     for custom in custom_logic.get("parent_is_self", []):
-        if comment_is_user(
-            comment, username, custom.get("level")
-        ) and comment.author.name == custom.get("author"):
-            msg: str = custom.get("msg")
-            if debug:
-                return msg
-            reply_custom(comment=comment, msg=msg, debug=debug)
-            return
+        if not comment_is_user(comment, username, custom.get("level")):
+            continue
+        if comment.author.name != custom.get("author"):
+            continue
+        msg: str = custom.get("msg")
+        return (
+            msg
+            if debug
+            else "replied"
+            if reply_custom(comment=comment, msg=msg, debug=debug)
+            else "failed"
+        )
     if keyword_in_comment(comment, keyword):
         for custom in custom_logic.get("keyword_in_comment", []):
-            if comment.author.name == custom.get("author"):
-                msg = custom.get("msg")
-                if debug:
-                    return msg
-                reply_custom(comment=comment, msg=msg, debug=debug)
-                return
+            if comment.author.name != custom.get("author"):
+                continue
+            msg: str = custom.get("msg")
+            return (
+                msg
+                if debug
+                else "replied"
+                if reply_custom(comment=comment, msg=msg, debug=debug)
+                else "failed"
+            )
         if not comment_is_user(comment, username, 1):
             # dont reply to own comment's reply to prevent spam
-            if debug:
-                return "reply mention"
-            reply_mention(mention=comment, debug=debug)
-            return
+            return (
+                "replied"
+                if reply_mention(mention=comment, debug=debug)
+                else "failed"
+            )
         if debug:
             return "keyword in comment (no reply)"
+    return "no reply"
 
 
 def submission_logic(submission, username, keyword, debug=False) -> str:
@@ -61,13 +73,15 @@ def submission_logic(submission, username, keyword, debug=False) -> str:
         # prevent spam, don't reply again
         return "already replied"
     if keyword_in_submission(submission, keyword):
-        if not debug:
-            reply_submission(submission=submission, debug=debug)
-        return "reply submission"
+        return (
+            "replied"
+            if reply_submission(submission, debug=debug)
+            else "failed"
+        )
     return "no reply"
 
 
-def reply_submission(submission, webhook=True, debug=False) -> bool:
+def reply_submission(submission, debug=False) -> bool:
     """
     submits a comment to a submission.
     attempts to retrieve messages from messages/mention.txt.
@@ -85,17 +99,15 @@ def reply_submission(submission, webhook=True, debug=False) -> bool:
         return True
     try:
         submission.reply(body=msg)
-        if webhook:
-            gen.post_webhook({"content": notif})
+        gen.post_webhook({"content": notif})
         return True
     except Exception as err:
         print(err)
-        if webhook:
-            gen.post_webhook({"content": err})
+        gen.post_webhook({"content": err})
         return False
 
 
-def reply_mention(mention, webhook=True, debug=False) -> bool:
+def reply_mention(mention, debug=False) -> bool:
     """
     submits a comment as a reply to a mentioned comment.
     attempts to retrieve messages from messages/mention.txt.
@@ -113,17 +125,15 @@ def reply_mention(mention, webhook=True, debug=False) -> bool:
         return True
     try:
         mention.reply(body=msg)
-        if webhook:
-            gen.post_webhook({"content": notif})
+        gen.post_webhook({"content": notif})
         return True
     except Exception as err:
         print(err)
-        if webhook:
-            gen.post_webhook({"content": err})
+        gen.post_webhook({"content": err})
         return False
 
 
-def reply_gratitude(comment, webhook=True, debug=False) -> bool:
+def reply_gratitude(comment, debug=False) -> bool:
     """
     submits a comment as a reply to a comment thanking the bot.
     attempts to retrieve messages from messages/thank.txt.
@@ -139,17 +149,15 @@ def reply_gratitude(comment, webhook=True, debug=False) -> bool:
         return True
     try:
         comment.reply(body=msg)
-        if webhook:
-            gen.post_webhook({"content": notif})
+        gen.post_webhook({"content": notif})
         return True
     except Exception as err:
         print(err)
-        if webhook:
-            gen.post_webhook({"content": err})
+        gen.post_webhook({"content": err})
         return False
 
 
-def reply_custom(comment, msg, webhook=True, debug=False) -> bool:
+def reply_custom(comment, msg, debug=False) -> bool:
     """
     submits a comment as a reply to a comment
     with a custom reply message.
@@ -162,13 +170,11 @@ def reply_custom(comment, msg, webhook=True, debug=False) -> bool:
         return True
     try:
         comment.reply(body=msg)
-        if webhook:
-            gen.post_webhook({"content": notif})
+        gen.post_webhook({"content": notif})
         return True
     except Exception as err:
         print(err)
-        if webhook:
-            gen.post_webhook({"content": err})
+        gen.post_webhook({"content": err})
         return False
 
 

@@ -1,3 +1,5 @@
+"""test general functions"""
+
 import unittest
 import yaml
 from helpers.general import (
@@ -8,7 +10,10 @@ from helpers.general import (
 
 
 class TestGeneral(unittest.TestCase):
+    """test general functions"""
+
     def test_try_load_config(self):
+        """test lodading config from fixture"""
         # test valid config.yaml
         self.assertEqual(
             try_load_config("tests/fixtures/valid.yaml"), {"key": "value"}
@@ -21,6 +26,7 @@ class TestGeneral(unittest.TestCase):
             try_load_config("tests/fixtures/invalid.yaml")
 
     def test_try_import_messages(self):
+        """test importing messages from fixture"""
         # test multiple lines
         self.assertEqual(
             try_import_messages("tests/fixtures/multiple.txt"),
@@ -48,6 +54,7 @@ class TestGeneral(unittest.TestCase):
         )
 
     def test_assign_random_weights(self):
+        """test assigning random weights"""
         # test multiple items
         self.assertEqual(
             assign_random_weights(["a", "b", "c", "d", "e"]),

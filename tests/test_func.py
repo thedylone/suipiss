@@ -1,3 +1,5 @@
+"""test bot functions"""
+
 import unittest
 import praw
 from helpers.func import (
@@ -10,10 +12,14 @@ from helpers.func import (
     submission_logic,
 )
 from bot import reddit, USERNAME
+import helpers.general as general
 
 
 class TestFunc(unittest.TestCase):
+    """test bot functions"""
+
     def test_already_replied_submission(self):
+        """test already replied submission with actual submissions"""
         submission = praw.models.Submission
         # test already replied
         self.assertTrue(
@@ -29,6 +35,7 @@ class TestFunc(unittest.TestCase):
         )
 
     def test_already_replied_comment(self):
+        """test already replied comment with actual comments"""
         comment = praw.models.Comment
         # test already replied
         self.assertTrue(
@@ -44,6 +51,7 @@ class TestFunc(unittest.TestCase):
         )
 
     def test_comment_is_user(self):
+        """test comment is user with actual comments"""
         comment = praw.models.Comment
         # test comment is self
         self.assertTrue(comment_is_user(comment(reddit, "hywwf45"), USERNAME))
@@ -71,6 +79,7 @@ class TestFunc(unittest.TestCase):
         )
 
     def test_keyword_in_comment(self):
+        """test keyword in comment with actual comments"""
         comment = praw.models.Comment
         # test keyword in comment
         self.assertTrue(
@@ -94,6 +103,7 @@ class TestFunc(unittest.TestCase):
         )
 
     def test_keyword_in_submission(self):
+        """test keyword in submission with actual submissions"""
         submission = praw.models.Submission
         # test keyword in title
         self.assertTrue(
@@ -109,8 +119,9 @@ class TestFunc(unittest.TestCase):
         )
 
     def test_comment_logic(self):
+        """test comment logic, using fake comments"""
         comment = praw.models.Comment
-        path = ("tests/fixtures/custom.yaml")
+        custom_logic = general.try_load_config("tests/fixtures/custom.yaml")
         username = "suipiss"
         keyword = "suipiss"
         # test comment is self
@@ -119,7 +130,7 @@ class TestFunc(unittest.TestCase):
                 comment(reddit, "hywwf45"),
                 username,
                 keyword,
-                path=path,
+                custom_logic=custom_logic,
                 debug=True,
             ),
             "comment is self",
@@ -130,7 +141,7 @@ class TestFunc(unittest.TestCase):
                 comment(reddit, "hz208fy"),
                 username,
                 keyword,
-                path=path,
+                custom_logic=custom_logic,
                 debug=True,
             ),
             "already replied",
@@ -146,7 +157,11 @@ class TestFunc(unittest.TestCase):
         )
         self.assertEqual(
             comment_logic(
-                fake_comment, username, keyword, path=path, debug=True
+                fake_comment,
+                username,
+                keyword,
+                custom_logic=custom_logic,
+                debug=True,
             ),
             "parent is self",
         )
@@ -154,9 +169,13 @@ class TestFunc(unittest.TestCase):
         fake_comment.body = "thanks"
         self.assertEqual(
             comment_logic(
-                fake_comment, username, keyword, path=path, debug=True
+                fake_comment,
+                username,
+                keyword,
+                custom_logic=custom_logic,
+                debug=True,
             ),
-            "reply gratitude",
+            "replied",
         )
         # test custom
         parent_parent_comment = FakeComment(author=FakeRedditor(username))
@@ -169,7 +188,7 @@ class TestFunc(unittest.TestCase):
                 fake_comment,
                 username,
                 keyword,
-                path=path,
+                custom_logic=custom_logic,
                 debug=True,
             ),
             "bot??? not bot",
@@ -181,7 +200,7 @@ class TestFunc(unittest.TestCase):
                 fake_comment,
                 username,
                 keyword,
-                path=path,
+                custom_logic=custom_logic,
                 debug=True,
             ),
             "ok thanks pekofy_bot",
@@ -193,7 +212,11 @@ class TestFunc(unittest.TestCase):
         # test pekofy_bot reply mention
         self.assertEqual(
             comment_logic(
-                fake_comment, username, keyword, path=path, debug=True
+                fake_comment,
+                username,
+                keyword,
+                custom_logic=custom_logic,
+                debug=True,
             ),
             "suipiss peko",
         )
@@ -201,12 +224,17 @@ class TestFunc(unittest.TestCase):
         fake_comment.author = FakeRedditor("not self")
         self.assertEqual(
             comment_logic(
-                fake_comment, username, keyword, path=path, debug=True
+                fake_comment,
+                username,
+                keyword,
+                custom_logic=custom_logic,
+                debug=True,
             ),
-            "reply mention",
+            "replied",
         )
 
     def test_submission_logic(self):
+        """test submission logic, using fake submissions"""
         submission = praw.models.Submission
         username = "suipiss"
         keyword = "suipiss"
@@ -221,17 +249,19 @@ class TestFunc(unittest.TestCase):
         fake_submission = FakeSubmission(title=keyword)
         self.assertEqual(
             submission_logic(fake_submission, username, keyword, debug=True),
-            "reply submission",
+            "replied",
         )
         # test reply submission from selftext
         fake_submission = FakeSubmission(selftext=keyword)
         self.assertEqual(
             submission_logic(fake_submission, username, keyword, debug=True),
-            "reply submission",
+            "replied",
         )
 
 
 class FakeRedditor:
+    """fake redditor class"""
+
     def __init__(self, name):
         self.name = name
 
@@ -243,17 +273,23 @@ class FakeRedditor:
 
 
 class FakeCommentForest:
+    """fake comment forest class"""
+
     def __init__(self, comments):
         self.comments = comments
 
     def list(self):
+        """return list of comments"""
         return self.comments
 
     def replace_more(self):
+        """placeholder function"""
         return
 
 
 class FakeComment:
+    """fake comment class"""
+
     def __init__(
         self,
         author=None,
@@ -267,15 +303,20 @@ class FakeComment:
         self.id = id
         self.parent_comment = parent_comment
         self.replies = replies
+        self.permalink = ""
 
     def parent(self):
+        """return parent comment"""
         return self.parent_comment
 
     def refresh(self):
+        """placeholder function"""
         return
 
 
 class FakeSubmission:
+    """fake submission class"""
+
     def __init__(
         self,
         author=None,
@@ -289,6 +330,7 @@ class FakeSubmission:
         self.id = id
         self.selftext = selftext
         self.title = title
+        self.permalink = ""
 
 
 if __name__ == "__main__":
