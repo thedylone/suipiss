@@ -1,11 +1,13 @@
 """test general functions"""
 
 import unittest
-import yaml
+
+from yaml.scanner import ScannerError
+
 from helpers.general import (
-    try_load_config,
-    try_import_messages,
     assign_random_weights,
+    try_import_messages,
+    try_load_config,
 )
 
 
@@ -22,7 +24,7 @@ class TestGeneral(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             try_load_config("")
         # test invalid yaml
-        with self.assertRaises(yaml.scanner.ScannerError):
+        with self.assertRaises(ScannerError):
             try_load_config("tests/fixtures/invalid.yaml")
 
     def test_try_import_messages(self):

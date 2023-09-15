@@ -1,9 +1,12 @@
 """bot functions for reddit bot"""
 
-import time
 import random
 import re
-import praw
+import time
+from typing import List
+
+from praw.exceptions import ClientException
+
 import helpers.general as gen
 
 REDDIT_URL = "https://reddit.com"
@@ -21,7 +24,7 @@ def comment_logic(
         return "already replied"
     if comment_is_user(comment, username, 1):
         # parent is user
-        gratitude: list[str] = ["thank", "good", "love"]
+        gratitude: List[str] = ["thank", "good", "love"]
         if keyword_in_comment(comment, *gratitude):
             return (
                 "replied"
@@ -89,8 +92,8 @@ def reply_submission(submission, debug=False) -> bool:
     50% chance of being selected.
     return True if successful.
     """
-    reply_messages: list[str] = gen.try_import_messages("messages/mention.txt")
-    reply_weights: list[float] = gen.assign_random_weights(reply_messages)
+    reply_messages: List[str] = gen.try_import_messages("messages/mention.txt")
+    reply_weights: List[float] = gen.assign_random_weights(reply_messages)
     msg: str = random.choices(reply_messages, weights=reply_weights, k=1)[0]
     notif: str = f"[POST] {REDDIT_URL}{submission.permalink} with {msg}"
     print(notif)
@@ -115,8 +118,8 @@ def reply_mention(mention, debug=False) -> bool:
     50% chance of being selected.
     return True if successful.
     """
-    reply_messages: list[str] = gen.try_import_messages("messages/mention.txt")
-    reply_weights: list[float] = gen.assign_random_weights(reply_messages)
+    reply_messages: List[str] = gen.try_import_messages("messages/mention.txt")
+    reply_weights: List[float] = gen.assign_random_weights(reply_messages)
     msg: str = random.choices(reply_messages, weights=reply_weights, k=1)[0]
     notif: str = f"[MENTION] {REDDIT_URL}{mention.permalink} with {msg}"
     print(notif)
@@ -140,7 +143,7 @@ def reply_gratitude(comment, debug=False) -> bool:
     all messages have equal chance of being selected.
     return True if successful.
     """
-    reply_messages: list[str] = gen.try_import_messages("messages/thank.txt")
+    reply_messages: List[str] = gen.try_import_messages("messages/thank.txt")
     msg: str = random.choice(reply_messages)
     notif: str = f"[THANK] {REDDIT_URL}{comment.permalink} with {msg}"
     print(notif)
@@ -196,7 +199,7 @@ def already_replied_comment(comment, username) -> bool:
         try:
             comment.refresh()
             break
-        except praw.exceptions.ClientException:
+        except ClientException:
             print("comments didn't load, trying again...")
             if second_refresh:
                 print("couldn't load comments, assuming already replied")

@@ -1,14 +1,15 @@
 """test signal handling"""
 
 import os
-import unittest
+import signal
 import subprocess
 import time
-import signal
+import unittest
 
 
 class TestSignal(unittest.TestCase):
     """test signal handling"""
+
     def test_signal(self):
         """test signal handling"""
         if os.name == "nt":

@@ -1,18 +1,20 @@
 """test bot functions"""
 
 import unittest
-import praw
+
+from praw.models import Comment, Submission
+
+import helpers.general as general
+from bot import USERNAME, reddit
 from helpers.func import (
-    already_replied_submission,
     already_replied_comment,
+    already_replied_submission,
     comment_is_user,
+    comment_logic,
     keyword_in_comment,
     keyword_in_submission,
-    comment_logic,
     submission_logic,
 )
-from bot import reddit, USERNAME
-import helpers.general as general
 
 
 class TestFunc(unittest.TestCase):
@@ -20,7 +22,7 @@ class TestFunc(unittest.TestCase):
 
     def test_already_replied_submission(self):
         """test already replied submission with actual submissions"""
-        submission = praw.models.Submission
+        submission = Submission
         # test already replied
         self.assertTrue(
             already_replied_submission(submission(reddit, "t48wjd"), USERNAME)
@@ -36,7 +38,7 @@ class TestFunc(unittest.TestCase):
 
     def test_already_replied_comment(self):
         """test already replied comment with actual comments"""
-        comment = praw.models.Comment
+        comment = Comment
         # test already replied
         self.assertTrue(
             already_replied_comment(comment(reddit, "hz208fy"), USERNAME)
@@ -52,7 +54,7 @@ class TestFunc(unittest.TestCase):
 
     def test_comment_is_user(self):
         """test comment is user with actual comments"""
-        comment = praw.models.Comment
+        comment = Comment
         # test comment is self
         self.assertTrue(comment_is_user(comment(reddit, "hywwf45"), USERNAME))
         # test comment parent is self
@@ -80,7 +82,7 @@ class TestFunc(unittest.TestCase):
 
     def test_keyword_in_comment(self):
         """test keyword in comment with actual comments"""
-        comment = praw.models.Comment
+        comment = Comment
         # test keyword in comment
         self.assertTrue(
             keyword_in_comment(comment(reddit, "hywy79s"), "suipiss")
@@ -104,7 +106,7 @@ class TestFunc(unittest.TestCase):
 
     def test_keyword_in_submission(self):
         """test keyword in submission with actual submissions"""
-        submission = praw.models.Submission
+        submission = Submission
         # test keyword in title
         self.assertTrue(
             keyword_in_submission(submission(reddit, "t48wjd"), "suipiss")
@@ -120,7 +122,7 @@ class TestFunc(unittest.TestCase):
 
     def test_comment_logic(self):
         """test comment logic, using fake comments"""
-        comment = praw.models.Comment
+        comment = Comment
         custom_logic = general.try_load_config("tests/fixtures/custom.yaml")
         username = "suipiss"
         keyword = "suipiss"
@@ -235,7 +237,7 @@ class TestFunc(unittest.TestCase):
 
     def test_submission_logic(self):
         """test submission logic, using fake submissions"""
-        submission = praw.models.Submission
+        submission = Submission
         username = "suipiss"
         keyword = "suipiss"
         # test already replied

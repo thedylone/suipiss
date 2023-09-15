@@ -1,12 +1,15 @@
 """general helper functions"""
 
+import json
 import os
 import sys
-import json
-from os.path import join, dirname
-from dotenv import load_dotenv
-import yaml
+from os.path import dirname, join
+from typing import List
+
 import requests
+import yaml
+from dotenv import load_dotenv
+from yaml.scanner import ScannerError
 
 dotenv_path = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
@@ -36,7 +39,7 @@ def try_load_config(path) -> dict:
                 yaml.dump({"SUBREDDITS": "", "KEYWORD": ""}, file)
             print("please fill in the config.yaml with your configurations")
         raise err
-    except yaml.scanner.ScannerError as err:
+    except ScannerError as err:
         print("invalid file! please ensure it is valid")
         raise err
     except Exception as err:
@@ -45,13 +48,13 @@ def try_load_config(path) -> dict:
     return config
 
 
-def try_import_messages(path, default_message="suipiss") -> list[str]:
+def try_import_messages(path, default_message="suipiss") -> List[str]:
     """
     attempts to read file at given path and return list
     of items split by line. if file is empty or unable to
     be read, returns a list containing the default message.
     """
-    reply_text_messages: list[str] = []
+    reply_text_messages: List[str] = []
     try:
         with open(path, "r", encoding="utf-8") as file:
             reply_text_messages = file.read().splitlines()
@@ -65,14 +68,14 @@ def try_import_messages(path, default_message="suipiss") -> list[str]:
     return reply_text_messages
 
 
-def assign_random_weights(input_list: list[str]) -> list[float]:
+def assign_random_weights(input_list: List[str]) -> List[float]:
     """
     returns a list of weights from the input.
     if there are multiple items, the first item has 0.5 chance,
     and the remaining 0.5 is split among the remaining items.
     """
     length: int = len(input_list)
-    weights: list[float] = []
+    weights: List[float] = []
     if length == 0:
         weights = []
     elif length > 1:
@@ -90,6 +93,6 @@ def post_webhook(data, url=os.environ.get("WEBHOOK_URL")) -> int:
         url=url,
         data=json.dumps(data),
         headers={"Content-Type": "application/json"},
-        timeout=10
+        timeout=10,
     )
     return req.status_code

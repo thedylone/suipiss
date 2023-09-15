@@ -1,5 +1,6 @@
-import bot
 import csv
+
+import bot
 
 
 def main():

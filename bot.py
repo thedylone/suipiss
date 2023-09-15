@@ -1,13 +1,15 @@
 """main file for the bot"""
 
-import os
 import argparse
+import os
 import signal
-from os.path import join, dirname
-from dotenv import load_dotenv
-import praw
-from helpers import general, func
+import time
+from os.path import dirname, join
 
+import praw
+from dotenv import load_dotenv
+
+from helpers import func, general
 
 dotenv_path: str = join(dirname(__file__), ".env")
 load_dotenv(dotenv_path)
@@ -37,23 +39,30 @@ def main():
     submission_stream = subreddits.stream.submissions(pause_after=-1)
     custom_logic: dict = general.try_load_config("custom.yaml")
     while True:
-        for comment in comment_stream:
-            if comment is None:
-                break
-            func.comment_logic(
-                comment,
-                USERNAME,
-                KEYWORD,
-                custom_logic=custom_logic,
-                debug=DEBUG_MODE,
-            )
+        try:
+            for comment in comment_stream:
+                if comment is None:
+                    break
+                func.comment_logic(
+                    comment,
+                    USERNAME,
+                    KEYWORD,
+                    custom_logic=custom_logic,
+                    debug=DEBUG_MODE,
+                )
 
-        for submission in submission_stream:
-            if submission is None:
-                break
-            func.submission_logic(
-                submission, USERNAME, KEYWORD, debug=DEBUG_MODE
-            )
+            for submission in submission_stream:
+                if submission is None:
+                    break
+                func.submission_logic(
+                    submission, USERNAME, KEYWORD, debug=DEBUG_MODE
+                )
+        except Exception as e:
+            # if 429 HTTP error or 503 HTTP error, sleep for 10 minutes
+            if "429" in str(e) or "503" in str(e):
+                time.sleep(600)
+            else:
+                raise e
 
 
 if __name__ == "__main__":
